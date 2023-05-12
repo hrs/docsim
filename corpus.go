@@ -9,7 +9,7 @@ func NewCorpus(documents []*Document) *Corpus {
 	var terms = make(TermMap)
 
 	for _, doc := range documents {
-		for term, count := range doc.Terms {
+		for term, count := range doc.TermCount {
 			terms[term] += count
 		}
 	}
