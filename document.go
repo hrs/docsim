@@ -5,8 +5,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/reiver/go-porterstemmer"
 )
 
 type Document struct {
@@ -48,7 +46,7 @@ func NewDocument(path string) (*Document, error) {
 			word = strings.TrimSuffix(word, "'s")
 
 			if word != "" && !inStoplist(word) {
-				words = append(words, string(porterstemmer.StemWithoutLowerCasing([]rune(word))))
+				words = append(words, stem(word))
 			}
 		}
 	}
