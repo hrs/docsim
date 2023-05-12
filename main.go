@@ -11,6 +11,9 @@ func main() {
 
 	docs := flag.Args()
 
-	fmt.Println("target: ", *targetFlag)
+	fmt.Println("target:", *targetFlag)
 	fmt.Println("corpus:", docs)
+
+	targetDoc, _ := NewDocument(*targetFlag)
+	fmt.Println("target doc:", targetDoc)
 }
