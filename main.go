@@ -15,5 +15,5 @@ func main() {
 	fmt.Println("corpus:", docs)
 
 	targetDoc, _ := NewDocument(*targetFlag)
-	fmt.Println("target doc:", targetDoc)
+	fmt.Printf("target doc: #%v\n", targetDoc)
 }
