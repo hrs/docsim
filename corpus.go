@@ -1,18 +1,28 @@
 package main
 
+import "math"
+
 type Corpus struct {
-	Documents []*Document
-	Terms     TermMap
+	Documents  []*Document
+	InvDocFreq TermMap
 }
 
 func NewCorpus(documents []*Document) *Corpus {
-	var terms = make(TermMap)
+	var docFreq = make(TermMap)
+	var invDocFreq = make(TermMap)
 
+	// For each term, in how many documents does it occur?
 	for _, doc := range documents {
-		for term, count := range doc.TermCount {
-			terms[term] += count
+		for term := range doc.TermFreq {
+			docFreq[term]++
 		}
 	}
 
-	return &Corpus{documents, terms}
+	// Invert document frequency and scale
+	docCount := float64(len(documents))
+	for term := range docFreq {
+		invDocFreq[term] = math.Log(docCount / docFreq[term])
+	}
+
+	return &Corpus{documents, invDocFreq}
 }

@@ -10,9 +10,8 @@ import (
 type TermMap map[string]float64
 
 type Document struct {
-	Path      string
-	TermCount TermMap
-	TermFreq  TermMap
+	Path     string
+	TermFreq TermMap
 }
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
@@ -67,5 +66,5 @@ func NewDocument(path string) (*Document, error) {
 		termFreq[term] = count / totalWordCount
 	}
 
-	return &Document{path, termCount, termFreq}, nil
+	return &Document{path, termFreq}, nil
 }
