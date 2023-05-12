@@ -7,9 +7,11 @@ import (
 	"strings"
 )
 
+type TermMap map[string]float32
+
 type Document struct {
 	Path  string
-	Words []string
+	Terms TermMap
 }
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
@@ -29,7 +31,7 @@ func NewDocument(path string) (*Document, error) {
 	scanner.Split(bufio.ScanWords)
 
 	// Initialize the words slice
-	words := []string{}
+	termMap := make(TermMap)
 
 	// Loop over the words and append each to the words slice
 	for scanner.Scan() {
@@ -46,7 +48,7 @@ func NewDocument(path string) (*Document, error) {
 			word = strings.TrimSuffix(word, "'s")
 
 			if word != "" && !inStoplist(word) {
-				words = append(words, stem(word))
+				termMap[stem(word)]++
 			}
 		}
 	}
@@ -56,5 +58,5 @@ func NewDocument(path string) (*Document, error) {
 		return nil, err
 	}
 
-	return &Document{path, words}, nil
+	return &Document{path, termMap}, nil
 }
