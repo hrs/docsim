@@ -3,17 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 )
+
+func makeCorpus(paths []string) *Corpus {
+	var documents []*Document
+
+	for _, path := range paths {
+		doc, err := NewDocument(path)
+
+		if err != nil {
+			log.Println(err)
+		} else {
+			documents = append(documents, doc)
+		}
+	}
+
+	return NewCorpus(documents)
+}
 
 func main() {
 	targetFlag := flag.String("target", "", "path to the file that results should match")
 	flag.Parse()
 
-	docs := flag.Args()
+	corpus := makeCorpus(flag.Args())
 
 	fmt.Println("target:", *targetFlag)
-	fmt.Println("corpus:", docs)
-
-	targetDoc, _ := NewDocument(*targetFlag)
-	fmt.Printf("target doc: #%v\n", targetDoc)
+	fmt.Println("corpus:", corpus)
 }
