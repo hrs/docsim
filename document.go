@@ -42,7 +42,7 @@ func NewDocument(path string) (*Document, error) {
 			// We'd like "don't" to stay "don't", but "'hello" to become "hello".
 			trimmedWord := strings.Trim(word, "'")
 
-			if trimmedWord != "" {
+			if trimmedWord != "" && !inStoplist(trimmedWord) {
 				words = append(words, trimmedWord)
 			}
 		}
