@@ -5,6 +5,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/reiver/go-porterstemmer"
 )
 
 type Document struct {
@@ -12,7 +14,7 @@ type Document struct {
 	Words []string
 }
 
-var nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9 ']+`)
+var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
 
 func NewDocument(path string) (*Document, error) {
 	// Open the file
@@ -40,10 +42,13 @@ func NewDocument(path string) (*Document, error) {
 		for _, word := range nonAlphanumericRegex.Split(token, -1) {
 			// Since we didn't split on single quotes, we need to trim them off now.
 			// We'd like "don't" to stay "don't", but "'hello" to become "hello".
-			trimmedWord := strings.Trim(word, "'")
+			word = strings.Trim(word, "'")
 
-			if trimmedWord != "" && !inStoplist(trimmedWord) {
-				words = append(words, trimmedWord)
+			// Similarly, we need to remove the common "'s" possessive case
+			word = strings.TrimSuffix(word, "'s")
+
+			if word != "" && !inStoplist(word) {
+				words = append(words, string(porterstemmer.StemWithoutLowerCasing([]rune(word))))
 			}
 		}
 	}
