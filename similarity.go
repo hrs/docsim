@@ -1,26 +1,19 @@
 package main
 
-import "sort"
-
 func (corpus *Corpus) SimilarDocuments(query *Document) []Score {
 	// Normalize query document to set TF-IDF weights per the corpus
 	query.NormalizeTfIdf(corpus.InvDocFreq)
 
 	scores := make([]Score, len(corpus.Documents))
-	for _, doc := range corpus.Documents {
+	for i, doc := range corpus.Documents {
 		score := Score{
 			Query:    query,
 			Document: doc,
 			Score:    doc.cosineSimilarity(query),
 		}
 
-		scores = append(scores, score)
+		scores[i] = score
 	}
-
-	// Sort results by score, low-to-high
-	sort.Slice(scores, func(i, j int) bool {
-		return scores[i].Score < scores[j].Score
-	})
 
 	return scores
 }
