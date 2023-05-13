@@ -29,5 +29,7 @@ func main() {
 	corpus := makeCorpus(flag.Args())
 	target, _ := NewDocument(*targetFlag)
 
-	fmt.Printf("%#v\n", corpus.SimilarDocuments(target))
+	for _, score := range corpus.SimilarDocuments(target) {
+		fmt.Println(score)
+	}
 }

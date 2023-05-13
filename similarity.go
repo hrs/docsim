@@ -1,5 +1,23 @@
 package main
 
+func (corpus *Corpus) SimilarDocuments(query *Document) []*Score {
+	// Normalize query document to set TF-IDF weights per the corpus
+	query.NormalizeTfIdf(corpus.InvDocFreq)
+
+	scores := make([]*Score, len(corpus.Documents))
+	for _, doc := range corpus.Documents {
+		score := &Score{
+			Query:    query,
+			Document: doc,
+			Score:    doc.cosineSimilarity(query),
+		}
+
+		scores = append(scores, score)
+	}
+
+	return scores
+}
+
 func (target *Document) cosineSimilarity(other *Document) float64 {
 	dotProd := 0.0
 
