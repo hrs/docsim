@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"math"
 	"os"
 	"regexp"
 	"strings"
@@ -13,6 +14,7 @@ type Document struct {
 	Path     string
 	TermFreq TermMap
 	TfIdf    TermMap
+	Norm     float64
 }
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
@@ -67,11 +69,21 @@ func NewDocument(path string) (*Document, error) {
 		termFreq[term] = count / totalWordCount
 	}
 
-	return &Document{path, termFreq, make(TermMap)}, nil
+	return &Document{Path: path, TermFreq: termFreq}, nil
 }
 
 func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
+	// Set the TF-IDF weights
+	doc.TfIdf = make(TermMap)
 	for term, weight := range doc.TermFreq {
 		doc.TfIdf[term] = weight * invDocFreq[term]
 	}
+
+	// Calculate and store the document's norm
+	norm := 0.0
+	for _, weight := range doc.TfIdf {
+		norm += weight * weight
+	}
+
+	doc.Norm = math.Sqrt(norm)
 }

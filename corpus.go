@@ -31,3 +31,15 @@ func NewCorpus(documents []*Document) *Corpus {
 
 	return &Corpus{documents, invDocFreq}
 }
+
+func (corpus *Corpus) SimilarDocuments(query *Document) map[string]float64 {
+	// Normalize query document to set TF-IDF weights per the corpus
+	query.NormalizeTfIdf(corpus.InvDocFreq)
+
+	similarities := make(map[string]float64)
+	for _, doc := range corpus.Documents {
+		similarities[doc.Path] = doc.cosineSimilarity(query)
+	}
+
+	return similarities
+}

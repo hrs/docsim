@@ -27,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	corpus := makeCorpus(flag.Args())
+	target, _ := NewDocument(*targetFlag)
 
-	fmt.Println("target:", *targetFlag)
-	fmt.Println("corpus:", corpus)
+	fmt.Printf("%#v\n", corpus.SimilarDocuments(target))
 }
