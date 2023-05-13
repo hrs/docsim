@@ -24,5 +24,10 @@ func NewCorpus(documents []*Document) *Corpus {
 		invDocFreq[term] = math.Log(docCount / docFreq[term])
 	}
 
+	// Assign TF-IDF weights to every document in the corpus
+	for _, doc := range documents {
+		doc.NormalizeTfIdf(invDocFreq)
+	}
+
 	return &Corpus{documents, invDocFreq}
 }

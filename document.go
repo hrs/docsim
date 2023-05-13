@@ -12,6 +12,7 @@ type TermMap map[string]float64
 type Document struct {
 	Path     string
 	TermFreq TermMap
+	TfIdf    TermMap
 }
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
@@ -66,5 +67,11 @@ func NewDocument(path string) (*Document, error) {
 		termFreq[term] = count / totalWordCount
 	}
 
-	return &Document{path, termFreq}, nil
+	return &Document{path, termFreq, make(TermMap)}, nil
+}
+
+func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
+	for term, weight := range doc.TermFreq {
+		doc.TfIdf[term] = weight * invDocFreq[term]
+	}
 }
