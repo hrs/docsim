@@ -5,12 +5,6 @@ import (
 	"sort"
 )
 
-type Config struct {
-	showScores bool
-	limit      int
-	bestFirst  bool
-}
-
 type Score struct {
 	Query    *Document
 	Document *Document
