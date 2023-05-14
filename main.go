@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"log"
+	"fmt"
+	"os"
 )
 
 func makeCorpus(paths []string) *Corpus {
@@ -12,7 +13,7 @@ func makeCorpus(paths []string) *Corpus {
 		doc, err := NewDocument(path)
 
 		if err != nil {
-			log.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		} else {
 			documents = append(documents, doc)
 		}
