@@ -1,8 +1,9 @@
 package main
 
 type Config struct {
-	showScores bool
-	limit      int
-	bestFirst  bool
-	omitTarget bool
+	BestFirst  bool
+	Limit      int
+	OmitTarget bool
+	ShowScores bool
+	Verbose    bool
 }

@@ -10,14 +10,16 @@ func makeCorpus(target *Document, paths []string, config Config) *Corpus {
 	var documents []*Document
 
 	for _, path := range paths {
-		if config.omitTarget && sameFile(target.Path, path) {
+		if config.OmitTarget && sameFile(target.Path, path) {
 			continue
 		}
 
 		doc, err := NewDocument(path)
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			if config.Verbose {
+				fmt.Fprintln(os.Stderr, err)
+			}
 		} else {
 			documents = append(documents, doc)
 		}
@@ -45,14 +47,16 @@ func main() {
 	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
 	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
+	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
 	omitTargetFlag := flag.Bool("omit-target", false, "don't include the target file itself in search results")
 	flag.Parse()
 
 	config := Config{
-		showScores: *showScoresFlag,
-		bestFirst:  *bestFirstFlag,
-		omitTarget: *omitTargetFlag,
-		limit:      *limitFlag,
+		ShowScores: *showScoresFlag,
+		BestFirst:  *bestFirstFlag,
+		OmitTarget: *omitTargetFlag,
+		Limit:      *limitFlag,
+		Verbose:    *verboseFlag,
 	}
 
 	target, _ := NewDocument(*targetFlag)
