@@ -2,10 +2,16 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"math"
+	"mime"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
+
+	"golang.org/x/tools/godoc/util"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 type TermMap map[string]float64
@@ -26,6 +32,11 @@ func NewDocument(path string) (*Document, error) {
 		return nil, err
 	}
 	defer file.Close()
+
+	// Ensure that this is a text file
+	if !isTextFile(path) {
+		return nil, fmt.Errorf("not a text file, skipping: %s", path)
+	}
 
 	// Create a scanner from the file
 	scanner := bufio.NewScanner(file)
@@ -86,4 +97,11 @@ func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
 	}
 
 	doc.Norm = math.Sqrt(norm)
+}
+
+func isTextFile(path string) bool {
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+
+	return strings.HasPrefix(mimeType, "text/") ||
+		(mimeType == "" && util.IsTextFile(vfs.OS("."), path))
 }
