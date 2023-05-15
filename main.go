@@ -3,25 +3,37 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 func makeCorpus(target *Document, paths []string, config Config) *Corpus {
 	var documents []*Document
 
 	for _, path := range paths {
-		if config.OmitTarget && sameFile(target.Path, path) {
-			continue
-		}
+		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
+			if xerr != nil {
+				panic(xerr)
+			}
 
-		doc, err := NewDocument(path)
+			if !xinfo.IsDir() && !(config.OmitTarget && sameFile(target.Path, xpath)) {
+				doc, err := NewDocument(xpath)
+
+				if err != nil {
+					if config.Verbose {
+						fmt.Fprintln(os.Stderr, err)
+					}
+				} else {
+					documents = append(documents, doc)
+				}
+			}
+
+			return nil
+		})
 
 		if err != nil {
-			if config.Verbose {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		} else {
-			documents = append(documents, doc)
+			panic(err)
 		}
 	}
 
