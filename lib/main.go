@@ -71,8 +71,20 @@ func main() {
 		Verbose:    *verboseFlag,
 	}
 
+	// If no search paths were provided, search the current directory
+	searchPaths := flag.Args()
+	if len(searchPaths) == 0 {
+		currentDir, err := os.Getwd()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		searchPaths = []string{currentDir}
+	}
+
 	query, _ := NewDocument(*queryFlag)
-	corpus := makeCorpus(query, flag.Args(), config)
+	corpus := makeCorpus(query, searchPaths, config)
 
 	printResults(corpus.SimilarDocuments(query), config)
 }
