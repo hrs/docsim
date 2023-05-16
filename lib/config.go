@@ -3,7 +3,7 @@ package main
 type Config struct {
 	BestFirst  bool
 	Limit      int
-	OmitTarget bool
+	OmitQuery  bool
 	ShowScores bool
 	Verbose    bool
 }

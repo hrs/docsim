@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func makeCorpus(target *Document, paths []string, config Config) *Corpus {
+func makeCorpus(query *Document, paths []string, config Config) *Corpus {
 	var documents []*Document
 
 	for _, path := range paths {
@@ -17,7 +17,7 @@ func makeCorpus(target *Document, paths []string, config Config) *Corpus {
 				panic(xerr)
 			}
 
-			if !xinfo.IsDir() && !(config.OmitTarget && sameFile(target.Path, xpath)) {
+			if !xinfo.IsDir() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
 				doc, err := NewDocument(xpath)
 
 				if err != nil {
@@ -55,24 +55,24 @@ func sameFile(a, b string) bool {
 }
 
 func main() {
-	targetFlag := flag.String("target", "", "path to the file that results should match")
+	queryFlag := flag.String("query", "", "path to the file that results should match")
 	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
 	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
 	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
-	omitTargetFlag := flag.Bool("omit-target", false, "don't include the target file itself in search results")
+	omitQueryFlag := flag.Bool("omit-query", false, "don't include the query file itself in search results")
 	flag.Parse()
 
 	config := Config{
 		ShowScores: *showScoresFlag,
 		BestFirst:  *bestFirstFlag,
-		OmitTarget: *omitTargetFlag,
+		OmitQuery:  *omitQueryFlag,
 		Limit:      *limitFlag,
 		Verbose:    *verboseFlag,
 	}
 
-	target, _ := NewDocument(*targetFlag)
-	corpus := makeCorpus(target, flag.Args(), config)
+	query, _ := NewDocument(*queryFlag)
+	corpus := makeCorpus(query, flag.Args(), config)
 
-	printResults(corpus.SimilarDocuments(target), config)
+	printResults(corpus.SimilarDocuments(query), config)
 }
