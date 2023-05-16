@@ -90,6 +90,10 @@ func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
 		doc.TfIdf[term] = weight * invDocFreq[term]
 	}
 
+	// Now that we've set TF-IDF weights, we can save memory by removing the
+	// original weights
+	doc.TermFreq = nil
+
 	// Calculate and store the document's norm
 	norm := 0.0
 	for _, weight := range doc.TfIdf {
