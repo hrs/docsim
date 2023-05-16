@@ -1,0 +1,43 @@
+.TH DOCSIM 1
+.SH NAME
+docsim \- score similarity between text documents
+.SH SYNOPSIS
+.B docsim
+[\fIOPTIONS\fR] \fB\-\-query \fIFILE\fR [\fIPATH\fR...]
+.SH DESCRIPTION
+.B docsim
+compares one file (the \fIquery\fR) with every other text file in the current
+directory and sorts them according to their textual similarity.
+.PP
+docsim's default behavior is parse the words out of each file (including the
+query), pass them through a stoplist to remove common English words, remove
+suffixes from each word with Porter stemming, perform TF-IDF to weight terms
+within the document and within the corpus, and report the cosine simularity
+between every document and the query.
+.PP
+docsim works best with English documents, since the included stoplist and
+stemming algorithm both operate on English words.
+.SH OPTIONS
+.TP
+.BR \-\-best\-first
+When enabled, docsim will sort results from best to worst, instead of the
+default (worst to best).
+.TP
+.BR \-\-limit " " \fINUM\fR
+Show no more that the best NUM results.
+.TP
+.BR \-\-omit\-query
+Don't include the query document itself in the results, even if it's in a
+directory being searched.
+.TP
+.BR \-\-show\-scores
+Include the cosine similarity between each document and the query in the results.
+.TP
+.BR \-\-verbose
+Print extra debugging information.
+.LP
+.SH BUGS
+Please report bugs if you find them:
+.BR https://github.com/hrs/docsim/issues
+.SH AUTHOR
+Harry R. Schwartz <hello@harryrschwartz.com>
