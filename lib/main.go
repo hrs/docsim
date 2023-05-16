@@ -57,6 +57,7 @@ func sameFile(a, b string) bool {
 func main() {
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
 	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
+	noStemmingFlag := flag.Bool("no-stemming", false, "don't perform stemming on words")
 	noStoplistFlag := flag.Bool("no-stoplist", false, "don't omit common words by using a stoplist")
 	omitQueryFlag := flag.Bool("omit-query", false, "don't include the query file itself in search results")
 	queryFlag := flag.String("query", "", "path to the file that results should match")
@@ -67,6 +68,7 @@ func main() {
 	config := Config{
 		BestFirst:  *bestFirstFlag,
 		Limit:      *limitFlag,
+		NoStemming: *noStemmingFlag,
 		NoStoplist: *noStoplistFlag,
 		OmitQuery:  *omitQueryFlag,
 		ShowScores: *showScoresFlag,

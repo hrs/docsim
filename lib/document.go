@@ -64,7 +64,12 @@ func NewDocument(path string, config *Config) (*Document, error) {
 
 			if word != "" {
 				if config.NoStoplist || !inStoplist(word) {
-					termCount[stem(word)]++
+					if config.NoStemming {
+						termCount[word]++
+					} else {
+						termCount[stem(word)]++
+					}
+
 					totalWordCount++
 				}
 			}

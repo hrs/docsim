@@ -26,6 +26,16 @@ default (worst to best).
 .BR \-\-limit " " \fINUM\fR
 Show no more that the best NUM results.
 .TP
+.BR \-\-no\-stemming
+Don't stem words. Stemming reduces inflected words to their word stem before
+comparing documents, which maps morphologically related words to a common term
+(so "spinning", "spinner", and "spins" might all map to "spin").
+.PP
+.RS
+Stemming usually improves scoring accuracy in English, but should probably be
+disabled when searching across code or documents in other languages.
+.RE
+.TP
 .BR \-\-no\-stoplist
 Don't filter out common words, like "the" and "because".
 .TP
