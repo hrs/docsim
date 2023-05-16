@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func makeCorpus(query *Document, paths []string, config Config) *Corpus {
+func makeCorpus(query *Document, paths []string, config *Config) *Corpus {
 	var documents []*Document
 
 	for _, path := range paths {
@@ -18,7 +18,7 @@ func makeCorpus(query *Document, paths []string, config Config) *Corpus {
 			}
 
 			if !xinfo.IsDir() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
-				doc, err := NewDocument(xpath)
+				doc, err := NewDocument(xpath, config)
 
 				if err != nil {
 					if config.Verbose {
@@ -55,19 +55,21 @@ func sameFile(a, b string) bool {
 }
 
 func main() {
-	queryFlag := flag.String("query", "", "path to the file that results should match")
-	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
 	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
-	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
+	noStoplistFlag := flag.Bool("no-stoplist", false, "don't omit common words by using a stoplist")
 	omitQueryFlag := flag.Bool("omit-query", false, "don't include the query file itself in search results")
+	queryFlag := flag.String("query", "", "path to the file that results should match")
+	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
+	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
 	flag.Parse()
 
 	config := Config{
-		ShowScores: *showScoresFlag,
 		BestFirst:  *bestFirstFlag,
-		OmitQuery:  *omitQueryFlag,
 		Limit:      *limitFlag,
+		NoStoplist: *noStoplistFlag,
+		OmitQuery:  *omitQueryFlag,
+		ShowScores: *showScoresFlag,
 		Verbose:    *verboseFlag,
 	}
 
@@ -83,8 +85,8 @@ func main() {
 		searchPaths = []string{currentDir}
 	}
 
-	query, _ := NewDocument(*queryFlag)
-	corpus := makeCorpus(query, searchPaths, config)
+	query, _ := NewDocument(*queryFlag, &config)
+	corpus := makeCorpus(query, searchPaths, &config)
 
 	printResults(corpus.SimilarDocuments(query), config)
 }

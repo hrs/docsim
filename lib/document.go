@@ -25,7 +25,7 @@ type Document struct {
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
 
-func NewDocument(path string) (*Document, error) {
+func NewDocument(path string, config *Config) (*Document, error) {
 	// Open the file
 	file, err := os.Open(path)
 	if err != nil {
@@ -62,9 +62,11 @@ func NewDocument(path string) (*Document, error) {
 			// Similarly, we need to remove the common "'s" possessive case
 			word = strings.TrimSuffix(word, "'s")
 
-			if word != "" && !inStoplist(word) {
-				termCount[stem(word)]++
-				totalWordCount++
+			if word != "" {
+				if config.NoStoplist || !inStoplist(word) {
+					termCount[stem(word)]++
+					totalWordCount++
+				}
 			}
 		}
 	}
