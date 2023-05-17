@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -75,19 +78,52 @@ func main() {
 		Verbose:    *verboseFlag,
 	}
 
+	if !config.Verbose {
+		// Suppress log timestamps and noisy output
+		log.SetFlags(0)
+	}
+
+	// If no query file was provided, read from stdin, write to a tempfile, and
+	// use that
+	queryPath := *queryFlag
+	if queryPath == "" {
+		reader := bufio.NewReader(os.Stdin)
+		data, err := ioutil.ReadAll(reader)
+		if err != nil {
+			log.Fatal("Error reading from STDIN:", err)
+		}
+
+		f, err := os.CreateTemp("", "docsim-*.txt")
+		if err != nil {
+			log.Fatal("error creating temporary file:", err)
+		}
+		defer os.Remove(f.Name())
+
+		_, err = f.Write(data)
+		if err != nil {
+			log.Fatal("error writing to temporary file:", err)
+		}
+		f.Close()
+
+		queryPath = f.Name()
+	}
+
+	query, err := NewDocument(queryPath, &config)
+	if err != nil {
+		log.Fatal("error parsing query:", err)
+	}
+
 	// If no search paths were provided, search the current directory
 	searchPaths := flag.Args()
 	if len(searchPaths) == 0 {
 		currentDir, err := os.Getwd()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			log.Fatal("error determining current directory:", err)
 		}
 
 		searchPaths = []string{currentDir}
 	}
 
-	query, _ := NewDocument(*queryFlag, &config)
 	corpus := makeCorpus(query, searchPaths, &config)
 
 	printResults(corpus.SimilarDocuments(query), config)
