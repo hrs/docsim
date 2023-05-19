@@ -14,9 +14,28 @@ query), pass them through a stoplist to remove common English words, remove
 suffixes from each word with Porter stemming, perform TF-IDF to weight terms
 within the document and within the corpus, and report the cosine simularity
 between every document and the query.
+.SS Working with non-English documents or source code
 .PP
-docsim works best with English documents, since the included stoplist and
-stemming algorithm both operate on English words.
+docsim works best with English text documents, since the included stoplist and
+stemming algorithm both operate on English words. Results won't be quite as
+good, but those features can be disabled with the \fV\-\-no\-stemming\fR and
+\fV\-\-no\-stoplist\fR flags:
+.IP
+.nf
+\f[C]
+docsim --query demando.txt --no-stoplist --no-stemming ~/esperanto_notes
+\f[R]
+.fi
+.PP
+Similarly, the same flags can be applied to a repository of source code.
+Operators (like \fV;\fR and \fV+=\fR) won't factor into the comparison, but
+identifiers and keywords will.
+.IP
+.nf
+\f[C]
+docsim --query main.c --no-stoplist --no-stemming **/*.c
+\f[R]
+.fi
 .SH OPTIONS
 .TP
 .BR \-\-best\-first
