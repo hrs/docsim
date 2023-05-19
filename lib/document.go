@@ -102,12 +102,16 @@ func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
 	doc.TermFreq = nil
 
 	// Calculate and store the document's norm
+	doc.Norm = doc.calcNorm()
+}
+
+func (doc *Document) calcNorm() float64 {
 	norm := 0.0
 	for _, weight := range doc.TfIdf {
 		norm += weight * weight
 	}
 
-	doc.Norm = math.Sqrt(norm)
+	return math.Sqrt(norm)
 }
 
 func isTextFile(path string) bool {
