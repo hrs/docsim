@@ -4,58 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 )
-
-func makeCorpus(query *Document, paths []string, config *Config) *Corpus {
-	var documents []*Document
-
-	for _, path := range paths {
-		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
-			if xerr != nil {
-				panic(xerr)
-			}
-
-			if !xinfo.IsDir() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
-				doc, err := NewDocument(xpath, config)
-
-				if err != nil {
-					if config.Verbose {
-						fmt.Fprintln(os.Stderr, err)
-					}
-				} else {
-					documents = append(documents, doc)
-				}
-			}
-
-			return nil
-		})
-
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return NewCorpus(documents)
-}
-
-func sameFile(a, b string) bool {
-	aFileInfo, err := os.Stat(a)
-	if err != nil {
-		return false
-	}
-
-	bFileInfo, err := os.Stat(b)
-	if err != nil {
-		return false
-	}
-
-	return os.SameFile(aFileInfo, bFileInfo)
-}
 
 func main() {
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
@@ -124,7 +76,7 @@ func main() {
 		searchPaths = []string{currentDir}
 	}
 
-	corpus := makeCorpus(query, searchPaths, &config)
+	corpus := ParseCorpus(query, searchPaths, &config)
 
 	printResults(corpus.SimilarDocuments(query), config)
 }

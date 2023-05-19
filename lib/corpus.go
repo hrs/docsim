@@ -1,6 +1,12 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"io/fs"
+	"math"
+	"os"
+	"path/filepath"
+)
 
 type Corpus struct {
 	Documents  []*Document
@@ -30,4 +36,50 @@ func NewCorpus(documents []*Document) *Corpus {
 	}
 
 	return &Corpus{documents, invDocFreq}
+}
+
+func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
+	var documents []*Document
+
+	for _, path := range paths {
+		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
+			if xerr != nil {
+				panic(xerr)
+			}
+
+			if !xinfo.IsDir() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
+				doc, err := NewDocument(xpath, config)
+
+				if err != nil {
+					if config.Verbose {
+						fmt.Fprintln(os.Stderr, err)
+					}
+				} else {
+					documents = append(documents, doc)
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return NewCorpus(documents)
+}
+
+func sameFile(a, b string) bool {
+	aFileInfo, err := os.Stat(a)
+	if err != nil {
+		return false
+	}
+
+	bFileInfo, err := os.Stat(b)
+	if err != nil {
+		return false
+	}
+
+	return os.SameFile(aFileInfo, bFileInfo)
 }
