@@ -63,7 +63,7 @@ func NewDocument(path string, config *Config) (*Document, error) {
 			word = strings.TrimSuffix(word, "'s")
 
 			if word != "" {
-				if config.NoStoplist || !inStoplist(word) {
+				if config.NoStoplist || !InStoplist(word) {
 					if config.NoStemming {
 						termCount[word]++
 					} else {

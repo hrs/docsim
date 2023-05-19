@@ -1,6 +1,6 @@
 package main
 
-func inStoplist(word string) bool {
+func InStoplist(word string) bool {
 	_, ok := stoplist[word]
 	return ok
 }
