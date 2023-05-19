@@ -3,8 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 )
@@ -40,7 +39,7 @@ func main() {
 	queryPath := *queryFlag
 	if queryPath == "" {
 		reader := bufio.NewReader(os.Stdin)
-		data, err := ioutil.ReadAll(reader)
+		data, err := io.ReadAll(reader)
 		if err != nil {
 			log.Fatal("Error reading from STDIN:", err)
 		}
