@@ -7,7 +7,6 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"golang.org/x/tools/godoc/util"
@@ -22,8 +21,6 @@ type Document struct {
 	TfIdf    TermMap
 	Norm     float64
 }
-
-var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
 
 func NewDocument(path string, config *Config) (*Document, error) {
 	// Ensure that this is a text file
@@ -54,7 +51,7 @@ func NewDocument(path string, config *Config) (*Document, error) {
 
 		// Split each token on non-alphanumeric characters (except single qutoes, to
 		// handle contractions)
-		for _, word := range nonAlphanumericRegex.Split(token, -1) {
+		for _, word := range strings.FieldsFunc(token, splitToken) {
 			// Since we didn't split on single quotes, we need to trim them off now.
 			// We'd like "don't" to stay "don't", but "'hello" to become "hello".
 			word = strings.Trim(word, "'")
@@ -88,6 +85,10 @@ func NewDocument(path string, config *Config) (*Document, error) {
 	}
 
 	return &Document{Path: path, TermFreq: termFreq}, nil
+}
+
+func splitToken(r rune) bool {
+	return !(r >= 'a' && r <= 'z') && !(r >= '0' && r <= '9') && r != ' ' && r != '\''
 }
 
 func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
