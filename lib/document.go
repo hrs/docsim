@@ -26,17 +26,17 @@ type Document struct {
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9 ']+`)
 
 func NewDocument(path string, config *Config) (*Document, error) {
+	// Ensure that this is a text file
+	if !isTextFile(path) {
+		return nil, fmt.Errorf("not a text file, skipping: %s", path)
+	}
+
 	// Open the file
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-
-	// Ensure that this is a text file
-	if !isTextFile(path) {
-		return nil, fmt.Errorf("not a text file, skipping: %s", path)
-	}
 
 	// Create a scanner from the file
 	scanner := bufio.NewScanner(file)
