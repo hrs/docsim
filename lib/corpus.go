@@ -47,7 +47,8 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 				panic(xerr)
 			}
 
-			if !xinfo.IsDir() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
+			// Don't parse directories or symlinks (or the queried file, if so configured)
+			if xinfo.Type().IsRegular() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
 				doc, err := NewDocument(xpath, config)
 
 				if err != nil {
