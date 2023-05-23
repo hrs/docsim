@@ -8,6 +8,19 @@ import (
 	"os"
 )
 
+func stoplist(flag string) *Stoplist {
+	if flag == "" {
+		return &DefaultStoplist
+	} else {
+		var err error
+		stoplist, err := ParseStoplist(flag)
+		if err != nil {
+			log.Fatal("Error reading custom stoplist:", err)
+		}
+		return stoplist
+	}
+}
+
 func main() {
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
 	followSymlinksFlag := flag.Bool("follow-symlinks", false, "included symlinked files in results")
@@ -17,6 +30,7 @@ func main() {
 	omitQueryFlag := flag.Bool("omit-query", false, "don't include the query file itself in search results")
 	queryFlag := flag.String("query", "", "path to the file that results should match")
 	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
+	stoplistFlag := flag.String("stoplist", "", "path to a file of words to be ignored")
 	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
 	flag.Parse()
 
@@ -28,7 +42,7 @@ func main() {
 		NoStoplist:     *noStoplistFlag,
 		OmitQuery:      *omitQueryFlag,
 		ShowScores:     *showScoresFlag,
-		Stoplist:       &DefaultStoplist,
+		Stoplist:       stoplist(*stoplistFlag),
 		Verbose:        *verboseFlag,
 	}
 

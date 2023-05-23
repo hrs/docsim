@@ -65,8 +65,22 @@ Don't filter out common words, like "the" and "because".
 Don't include the query document itself in the results, even if it's in a
 directory being searched.
 .TP
+.BR \-\-query " " \fIFILE\fR
+Use \fIFILE\fR as the query against which all other files will be compared.
+.TP
 .BR \-\-show\-scores
 Include the cosine similarity between each document and the query in the results.
+.TP
+.BR \-\-stoplist " " \fISTOPLIST\fR
+Provide a custom stoplist to use instead of the default English stoplist.
+\fISTOPLIST\fR should be a text file with one word per line. Those words will be
+excluded from textual analysis.
+.PP
+.RS
+Generally stoplists are filled with common words (like "the" and "because" in
+English, or "char" and "struct" in C) that don't carry significant semantic
+value.
+.RE
 .TP
 .BR \-\-verbose
 Print extra debugging information.

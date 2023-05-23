@@ -1,5 +1,11 @@
 package main
 
+import (
+	"bufio"
+	"os"
+	"strings"
+)
+
 type Stoplist map[string]bool
 
 func (stoplist *Stoplist) Include(term string) bool {
@@ -15,6 +21,25 @@ func NewStoplist(terms []string) *Stoplist {
 	}
 
 	return &stoplist
+}
+
+func ParseStoplist(path string) (*Stoplist, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanWords)
+
+	terms := []string{}
+
+	for scanner.Scan() {
+		terms = append(terms, strings.ToLower(scanner.Text()))
+	}
+
+	return NewStoplist(terms), nil
 }
 
 var DefaultStoplist = Stoplist{
