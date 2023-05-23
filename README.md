@@ -66,7 +66,12 @@ algorithm, you'll almost certainly want to use the `--no-stoplist` and
 
 ## Installation
 
-If you've got a Go toolchain handy, you can either:
+The easiest thing is probably to grab a [compiled binary][] appropriate to your
+platform.
+
+[compiled binary]: https://github.com/hrs/docsim/releases/latest
+
+But if you've got a Go toolchain handy, you can also either:
 
 ``` console
 $ git clone git@github.com:hrs/docsim.git
