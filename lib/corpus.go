@@ -48,7 +48,7 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 			}
 
 			// Don't parse directories or symlinks (or the queried file, if so configured)
-			if xinfo.Type().IsRegular() && !(config.OmitQuery && sameFile(query.Path, xpath)) {
+			if isParsableFile(xinfo, config) && !(config.OmitQuery && sameFile(query.Path, xpath)) {
 				doc, err := NewDocument(xpath, config)
 
 				if err != nil {
@@ -69,6 +69,13 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 	}
 
 	return NewCorpus(documents)
+}
+
+func isParsableFile(info fs.DirEntry, config *Config) bool {
+	// Return true if this is either a regular file OR if it's a symlink that the
+	// user's chosen to include
+	return info.Type().IsRegular() ||
+		(config.FollowSymlinks && (info.Type()&os.ModeSymlink != 0))
 }
 
 func sameFile(a, b string) bool {

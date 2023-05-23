@@ -10,6 +10,7 @@ import (
 
 func main() {
 	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
+	followSymlinksFlag := flag.Bool("follow-symlinks", false, "included symlinked files in results")
 	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
 	noStemmingFlag := flag.Bool("no-stemming", false, "don't perform stemming on words")
 	noStoplistFlag := flag.Bool("no-stoplist", false, "don't omit common words by using a stoplist")
@@ -20,13 +21,14 @@ func main() {
 	flag.Parse()
 
 	config := Config{
-		BestFirst:  *bestFirstFlag,
-		Limit:      *limitFlag,
-		NoStemming: *noStemmingFlag,
-		NoStoplist: *noStoplistFlag,
-		OmitQuery:  *omitQueryFlag,
-		ShowScores: *showScoresFlag,
-		Verbose:    *verboseFlag,
+		BestFirst:      *bestFirstFlag,
+		FollowSymlinks: *followSymlinksFlag,
+		Limit:          *limitFlag,
+		NoStemming:     *noStemmingFlag,
+		NoStoplist:     *noStoplistFlag,
+		OmitQuery:      *omitQueryFlag,
+		ShowScores:     *showScoresFlag,
+		Verbose:        *verboseFlag,
 	}
 
 	if !config.Verbose {

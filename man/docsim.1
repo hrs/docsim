@@ -42,6 +42,9 @@ docsim --query main.c --no-stoplist --no-stemming **/*.c
 When enabled, docsim will sort results from best to worst, instead of the
 default (worst to best).
 .TP
+.BR \-\-follow\-symlinks
+Parse symbolic links in the search path. Default behavior is to ignore symlinks.
+.TP
 .BR \-\-limit " " \fINUM\fR
 Show no more that the best NUM results.
 .TP
