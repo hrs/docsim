@@ -64,6 +64,9 @@ algorithm, you'll almost certainly want to use the `--no-stoplist` and
 `--no-stemming` flags if your documents are written in another language
 (including source code).
 
+Optionally, you can use the `--stoplist` flag to provide a custom stoplist. A
+custom stoplist is just a text file of words to ignore, separated by whitespace.
+
 ## Installation
 
 The easiest thing is probably to grab a [compiled binary][] appropriate to your
@@ -85,9 +88,8 @@ Or just:
 $ go install github.com/hrs/docsim/docsim@latest
 ```
 
-Note that using `go install` that doesn't include the [`man` page][], which you
-can optionally install manually by copying into e.g.
-`/usr/local/share/man/man1`.
+Note that using `go install` doesn't include the [`man` page][], which you can
+optionally install manually by copying into e.g. `/usr/local/share/man/man1`.
 
 [`man` page]: ./man/docsim.1
 

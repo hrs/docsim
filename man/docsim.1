@@ -18,8 +18,8 @@ between every document and the query.
 .PP
 docsim works best with English text documents, since the included stoplist and
 stemming algorithm both operate on English words. Results won't be quite as
-good, but those features can be disabled with the \fV\-\-no\-stemming\fR and
-\fV\-\-no\-stoplist\fR flags:
+good, but those features can be disabled with the \fB\-\-no\-stemming\fR and
+\fB\-\-no\-stoplist\fR flags:
 .IP
 .nf
 \f[C]
@@ -28,12 +28,20 @@ docsim --query demando.txt --no-stoplist --no-stemming ~/esperanto_notes
 .fi
 .PP
 Similarly, the same flags can be applied to a repository of source code.
-Operators (like \fV;\fR and \fV+=\fR) won't factor into the comparison, but
+Operators (like \fB;\fR and \fB+=\fR) won't factor into the comparison, but
 identifiers and keywords will.
 .IP
 .nf
 \f[C]
 docsim --query main.c --no-stoplist --no-stemming **/*.c
+\f[R]
+.fi
+.PP
+However, docsim does support custom stoplists with the \fB\-\-stoplist\fR flag.
+.IP
+.nf
+\f[C]
+docsim --query demando.txt --stoplist ~/esperanto_stoplist.txt --no-stemming ~/esperanto_notes
 \f[R]
 .fi
 .SH OPTIONS
@@ -80,6 +88,9 @@ excluded from textual analysis.
 Generally stoplists are filled with common words (like "the" and "because" in
 English, or "char" and "struct" in C) that don't carry significant semantic
 value.
+.PP
+Note that if the \fB\-\-no\-stoplist\fR flag is also set it will supersede this
+one and the custom stoplist will be ignored.
 .RE
 .TP
 .BR \-\-verbose
