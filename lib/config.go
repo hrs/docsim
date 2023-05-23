@@ -8,5 +8,6 @@ type Config struct {
 	NoStoplist     bool
 	OmitQuery      bool
 	ShowScores     bool
+	Stoplist       *Stoplist
 	Verbose        bool
 }

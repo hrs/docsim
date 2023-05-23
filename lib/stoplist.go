@@ -1,11 +1,23 @@
 package main
 
-func InStoplist(word string) bool {
-	_, ok := stoplist[word]
+type Stoplist map[string]bool
+
+func (stoplist *Stoplist) Include(term string) bool {
+	_, ok := (*stoplist)[term]
 	return ok
 }
 
-var stoplist = map[string]bool{
+func NewStoplist(terms []string) *Stoplist {
+	stoplist := make(Stoplist)
+
+	for _, term := range terms {
+		stoplist[term] = true
+	}
+
+	return &stoplist
+}
+
+var DefaultStoplist = Stoplist{
 	"'ll":             true,
 	"'ve":             true,
 	"I":               true,

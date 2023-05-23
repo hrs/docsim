@@ -28,6 +28,7 @@ func main() {
 		NoStoplist:     *noStoplistFlag,
 		OmitQuery:      *omitQueryFlag,
 		ShowScores:     *showScoresFlag,
+		Stoplist:       &DefaultStoplist,
 		Verbose:        *verboseFlag,
 	}
 
