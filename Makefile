@@ -12,8 +12,8 @@ MANPAGE=$(BINARY).1
 .PHONY: build
 build: $(BINARY)
 
-$(BINARY): $(shell find . -iname *.go)
-	$(GOBUILD) -o $(BINARY) -v ./...
+$(BINARY): $(shell find * -iname *.go)
+	$(GOBUILD) -o $(BINARY) -v
 
 .PHONY: install
 install: $(BINARY)

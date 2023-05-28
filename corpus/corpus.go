@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import (
 	"fmt"
@@ -9,17 +9,17 @@ import (
 )
 
 type Corpus struct {
-	Documents  []*Document
-	InvDocFreq TermMap
+	documents  []*Document
+	invDocFreq termMap
 }
 
 func NewCorpus(documents []*Document) *Corpus {
-	var docFreq = make(TermMap)
-	var invDocFreq = make(TermMap)
+	var docFreq = make(termMap)
+	var invDocFreq = make(termMap)
 
 	// For each term, in how many documents does it occur?
 	for _, doc := range documents {
-		for term := range doc.TermFreq {
+		for term := range doc.termFreq {
 			docFreq[term]++
 		}
 	}
@@ -32,7 +32,7 @@ func NewCorpus(documents []*Document) *Corpus {
 
 	// Assign TF-IDF weights to every document in the corpus
 	for _, doc := range documents {
-		doc.NormalizeTfIdf(invDocFreq)
+		doc.normalizeTfIdf(invDocFreq)
 	}
 
 	return &Corpus{documents, invDocFreq}
@@ -48,7 +48,7 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 			}
 
 			// Don't parse directories or symlinks (or the queried file, if so configured)
-			if isParsableFile(xinfo, config) && !(config.OmitQuery && sameFile(query.Path, xpath)) {
+			if isParsableFile(xinfo, config) && !(config.OmitQuery && sameFile(query.path, xpath)) {
 				doc, err := NewDocument(xpath, config)
 
 				if err != nil {

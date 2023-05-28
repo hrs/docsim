@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestNormalizeTfIdf(t *testing.T) {
-	tm := TermMap{
+	tm := termMap{
 		"foo": 2.0,
 		"bar": 3.0,
 		"baz": 4.0,
@@ -14,22 +14,22 @@ func TestNormalizeTfIdf(t *testing.T) {
 
 	tests := []struct {
 		doc    Document
-		idf    TermMap
+		idf    termMap
 		expDoc Document
 	}{
 		{
 			Document{
-				TermFreq: TermMap{},
+				termFreq: termMap{},
 			},
 			tm,
 			Document{
-				TfIdf: TermMap{},
-				Norm:  0.0,
+				tfIdf: termMap{},
+				norm:  0.0,
 			},
 		},
 		{
 			Document{
-				TermFreq: TermMap{
+				termFreq: termMap{
 					"foo": 3.0,
 					"bar": 4.0,
 					"baz": 5.0,
@@ -37,29 +37,29 @@ func TestNormalizeTfIdf(t *testing.T) {
 			},
 			tm,
 			Document{
-				TfIdf: TermMap{
+				tfIdf: termMap{
 					"foo": 6.0,
 					"bar": 12.0,
 					"baz": 20.0,
 				},
-				Norm: 24.0832,
+				norm: 24.0832,
 			},
 		},
 	}
 
 	for _, tc := range tests {
-		tc.doc.NormalizeTfIdf(tc.idf)
+		tc.doc.normalizeTfIdf(tc.idf)
 
-		if !reflect.DeepEqual(tc.doc.TfIdf, tc.expDoc.TfIdf) {
-			t.Errorf("got %v, wanted %v", tc.doc.TfIdf, tc.expDoc.TfIdf)
+		if !reflect.DeepEqual(tc.doc.tfIdf, tc.expDoc.tfIdf) {
+			t.Errorf("got %v, wanted %v", tc.doc.tfIdf, tc.expDoc.tfIdf)
 		}
 
-		if !approxEq(tc.doc.Norm, tc.expDoc.Norm) {
-			t.Errorf("got %.4f, wanted %.4f", tc.doc.Norm, tc.expDoc.Norm)
+		if !approxEq(tc.doc.norm, tc.expDoc.norm) {
+			t.Errorf("got %.4f, wanted %.4f", tc.doc.norm, tc.expDoc.norm)
 		}
 
-		if tc.doc.TermFreq != nil {
-			t.Errorf("got %v, wanted nil", tc.doc.TermFreq)
+		if tc.doc.termFreq != nil {
+			t.Errorf("got %v, wanted nil", tc.doc.termFreq)
 		}
 	}
 }
@@ -70,13 +70,13 @@ func TestCalcNorm(t *testing.T) {
 	}{
 		{
 			Document{
-				TfIdf: TermMap{},
+				tfIdf: termMap{},
 			},
 			0.0,
 		},
 		{
 			Document{
-				TfIdf: TermMap{
+				tfIdf: termMap{
 					"foo": 2.0,
 					"bar": 3.0,
 					"baz": 4.0,

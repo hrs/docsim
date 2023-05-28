@@ -1,20 +1,20 @@
-package main
+package corpus
 
 import (
 	"fmt"
 	"sort"
 )
 
-type Score struct {
-	Query    *Document
-	Document *Document
-	Score    float64
+type score struct {
+	query    *Document
+	document *Document
+	score    float64
 }
 
-func printResults(scores []Score, config Config) {
+func PrintResults(scores []score, config Config) {
 	// Sort results by score, worst matches first
 	sort.Slice(scores, func(i, j int) bool {
-		return scores[i].Score > scores[j].Score
+		return scores[i].score > scores[j].score
 	})
 
 	if config.Limit > 0 && len(scores) > config.Limit {
@@ -22,7 +22,7 @@ func printResults(scores []Score, config Config) {
 	}
 
 	if !config.BestFirst {
-		tmp := make([]Score, len(scores))
+		tmp := make([]score, len(scores))
 		for i, score := range scores {
 			tmp[len(scores)-i-1] = score
 		}
@@ -31,9 +31,9 @@ func printResults(scores []Score, config Config) {
 
 	for _, score := range scores {
 		if config.ShowScores {
-			fmt.Printf("%.4f\t%s\n", score.Score, score.Document.Path)
+			fmt.Printf("%.4f\t%s\n", score.score, score.document.path)
 		} else {
-			fmt.Println(score.Document.Path)
+			fmt.Println(score.document.path)
 		}
 	}
 }

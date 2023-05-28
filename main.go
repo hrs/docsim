@@ -6,14 +6,16 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/hrs/docsim/corpus"
 )
 
-func stoplist(flag string) *Stoplist {
+func stoplist(flag string) *corpus.Stoplist {
 	if flag == "" {
-		return &DefaultStoplist
+		return corpus.DefaultStoplist
 	} else {
 		var err error
-		stoplist, err := ParseStoplist(flag)
+		stoplist, err := corpus.ParseStoplist(flag)
 		if err != nil {
 			log.Fatal("Error reading custom stoplist:", err)
 		}
@@ -34,7 +36,7 @@ func main() {
 	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
 	flag.Parse()
 
-	config := Config{
+	config := corpus.Config{
 		BestFirst:      *bestFirstFlag,
 		FollowSymlinks: *followSymlinksFlag,
 		Limit:          *limitFlag,
@@ -76,7 +78,7 @@ func main() {
 		queryPath = f.Name()
 	}
 
-	query, err := NewDocument(queryPath, &config)
+	query, err := corpus.NewDocument(queryPath, &config)
 	if err != nil {
 		log.Fatal("error parsing query:", err)
 	}
@@ -92,7 +94,7 @@ func main() {
 		searchPaths = []string{currentDir}
 	}
 
-	corpus := ParseCorpus(query, searchPaths, &config)
+	c := corpus.ParseCorpus(query, searchPaths, &config)
 
-	printResults(corpus.SimilarDocuments(query), config)
+	corpus.PrintResults(c.SimilarDocuments(query), config)
 }

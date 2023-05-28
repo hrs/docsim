@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import "testing"
 
@@ -14,7 +14,7 @@ func TestDefaultStoplist(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		got := DefaultStoplist.Include(tc.word)
+		got := DefaultStoplist.include(tc.word)
 
 		if got != tc.expected {
 			t.Errorf("got %t, wanted %t", got, tc.expected)
@@ -23,7 +23,7 @@ func TestDefaultStoplist(t *testing.T) {
 }
 
 func TestCustomStoplist(t *testing.T) {
-	stoplist := NewStoplist([]string{
+	stoplist := newStoplist([]string{
 		"foo",
 		"bar",
 	})
@@ -38,7 +38,7 @@ func TestCustomStoplist(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		got := stoplist.Include(tc.word)
+		got := stoplist.include(tc.word)
 
 		if got != tc.expected {
 			t.Errorf("got %t, wanted %t", got, tc.expected)

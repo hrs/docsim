@@ -1,4 +1,4 @@
-package main
+package corpus
 
 type Config struct {
 	BestFirst      bool

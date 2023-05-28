@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import (
 	"bufio"
@@ -8,12 +8,12 @@ import (
 
 type Stoplist map[string]bool
 
-func (stoplist *Stoplist) Include(term string) bool {
+func (stoplist *Stoplist) include(term string) bool {
 	_, ok := (*stoplist)[term]
 	return ok
 }
 
-func NewStoplist(terms []string) *Stoplist {
+func newStoplist(terms []string) *Stoplist {
 	stoplist := make(Stoplist)
 
 	for _, term := range terms {
@@ -39,10 +39,10 @@ func ParseStoplist(path string) (*Stoplist, error) {
 		terms = append(terms, strings.ToLower(scanner.Text()))
 	}
 
-	return NewStoplist(terms), nil
+	return newStoplist(terms), nil
 }
 
-var DefaultStoplist = Stoplist{
+var DefaultStoplist = &Stoplist{
 	"'ll":             true,
 	"'ve":             true,
 	"I":               true,

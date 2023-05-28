@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import (
 	"bufio"
@@ -13,13 +13,13 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-type TermMap map[string]float64
+type termMap map[string]float64
 
 type Document struct {
-	Path     string
-	TermFreq TermMap
-	TfIdf    TermMap
-	Norm     float64
+	path     string
+	termFreq termMap
+	tfIdf    termMap
+	norm     float64
 }
 
 func NewDocument(path string, config *Config) (*Document, error) {
@@ -42,7 +42,7 @@ func NewDocument(path string, config *Config) (*Document, error) {
 	scanner.Split(bufio.ScanWords)
 
 	// Initialize the words slice
-	termCount := make(TermMap)
+	termCount := make(termMap)
 	totalWordCount := 0.0
 
 	// Loop over the words and append each to the words slice
@@ -60,7 +60,7 @@ func NewDocument(path string, config *Config) (*Document, error) {
 			word = strings.TrimSuffix(word, "'s")
 
 			if word != "" {
-				if config.NoStoplist || !config.Stoplist.Include(word) {
+				if config.NoStoplist || !config.Stoplist.include(word) {
 					if config.NoStemming {
 						termCount[word]++
 					} else {
@@ -79,36 +79,36 @@ func NewDocument(path string, config *Config) (*Document, error) {
 	}
 
 	// Build the term frequency map
-	termFreq := make(TermMap)
+	termFreq := make(termMap)
 	for term, count := range termCount {
 		termFreq[term] = count / totalWordCount
 	}
 
-	return &Document{Path: path, TermFreq: termFreq}, nil
+	return &Document{path: path, termFreq: termFreq}, nil
 }
 
 func splitToken(r rune) bool {
 	return !(r >= 'a' && r <= 'z') && !(r >= '0' && r <= '9') && r != ' ' && r != '\''
 }
 
-func (doc *Document) NormalizeTfIdf(invDocFreq TermMap) {
+func (doc *Document) normalizeTfIdf(invDocFreq termMap) {
 	// Set the TF-IDF weights
-	doc.TfIdf = make(TermMap)
-	for term, weight := range doc.TermFreq {
-		doc.TfIdf[term] = weight * invDocFreq[term]
+	doc.tfIdf = make(termMap)
+	for term, weight := range doc.termFreq {
+		doc.tfIdf[term] = weight * invDocFreq[term]
 	}
 
 	// Now that we've set TF-IDF weights, we can save memory by removing the
 	// original weights
-	doc.TermFreq = nil
+	doc.termFreq = nil
 
 	// Calculate and store the document's norm
-	doc.Norm = doc.calcNorm()
+	doc.norm = doc.calcNorm()
 }
 
 func (doc *Document) calcNorm() float64 {
 	norm := 0.0
-	for _, weight := range doc.TfIdf {
+	for _, weight := range doc.tfIdf {
 		norm += weight * weight
 	}
 

@@ -1,4 +1,4 @@
-package main
+package corpus
 
 import (
 	"math"
@@ -18,14 +18,14 @@ func TestCosineSimilarity(t *testing.T) {
 		sim    float64
 	}
 
-	docA := Document{TfIdf: TermMap{"foo": 0.3013, "bar": 0.2628}}
-	docA.Norm = docA.calcNorm()
+	docA := Document{tfIdf: termMap{"foo": 0.3013, "bar": 0.2628}}
+	docA.norm = docA.calcNorm()
 
-	docB := Document{TfIdf: TermMap{"baz": 0.1577, "quux": 0.7796, "xyzzy": 0.1577}}
-	docB.Norm = docB.calcNorm()
+	docB := Document{tfIdf: termMap{"baz": 0.1577, "quux": 0.7796, "xyzzy": 0.1577}}
+	docB.norm = docB.calcNorm()
 
-	docC := Document{TfIdf: TermMap{"foo": 0.2260, "quux": 0.6496}}
-	docC.Norm = docC.calcNorm()
+	docC := Document{tfIdf: termMap{"foo": 0.2260, "quux": 0.6496}}
+	docC.norm = docC.calcNorm()
 
 	cosTests := []cosTest{
 		{&docA, &docA, 1.0},
