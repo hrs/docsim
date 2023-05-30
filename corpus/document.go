@@ -4,14 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"mime"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"golang.org/x/tools/godoc/util"
-	"golang.org/x/tools/godoc/vfs"
 )
 
 type termMap map[string]float64
@@ -127,8 +126,33 @@ func (doc *Document) calcNorm() float64 {
 }
 
 func isTextFile(path string) bool {
+	// First, try to get the file's MIME type from its extension, if that's
+	// available.
 	mimeType := mime.TypeByExtension(filepath.Ext(path))
 
-	return strings.HasPrefix(mimeType, "text/") ||
-		(mimeType == "" && util.IsTextFile(vfs.OS("."), path))
+	// If the MIME type can't be determined from the extension (maybe the file
+	// lacks an extension, or maybe the local `mime.types` file doesn't exist)
+	// instead try reading the first 4KB of the file and try to detect the content
+	// type from that.
+	if mimeType == "" {
+		// Open the file for reading.
+		file, err := os.Open(path)
+		if err != nil {
+			log.Fatalf("couldn't open file '%s': %s\n", path, err)
+		}
+		defer file.Close()
+
+		// Read a byte slice of the file. Return false if the file's empty; there's
+		// no reason to process it.
+		data := make([]byte, 4096)
+		_, err = file.Read(data)
+		if err == io.EOF {
+			return false
+		} else if err != nil {
+			log.Fatalf("couldn't read file '%s': %s\n", path, err)
+		}
+		mimeType = http.DetectContentType(data)
+	}
+
+	return strings.HasPrefix(mimeType, "text/")
 }
