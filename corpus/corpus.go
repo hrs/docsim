@@ -49,7 +49,7 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 
 			// Don't parse directories or symlinks (or the queried file, if so configured)
 			if isParsableFile(xinfo, config) && !(config.OmitQuery && sameFile(query.path, xpath)) {
-				doc, err := NewDocument(xpath, config)
+				doc, err := ParseDocument(xpath, config)
 
 				if err != nil {
 					if config.Verbose {

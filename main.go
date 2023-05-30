@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"flag"
-	"io"
 	"log"
 	"os"
 
@@ -21,6 +19,14 @@ func stoplist(flag string) *corpus.Stoplist {
 		}
 		return stoplist
 	}
+}
+
+func queryDoc(path string, config *corpus.Config) (*corpus.Document, error) {
+	if path == "" {
+		return corpus.NewDocument(os.Stdin, config)
+	}
+
+	return corpus.ParseDocument(path, config)
 }
 
 func main() {
@@ -53,32 +59,8 @@ func main() {
 		log.SetFlags(0)
 	}
 
-	// If no query file was provided, read from stdin, write to a tempfile, and
-	// use that
-	queryPath := *queryFlag
-	if queryPath == "" {
-		reader := bufio.NewReader(os.Stdin)
-		data, err := io.ReadAll(reader)
-		if err != nil {
-			log.Fatal("Error reading from STDIN:", err)
-		}
-
-		f, err := os.CreateTemp("", "docsim-*.txt")
-		if err != nil {
-			log.Fatal("error creating temporary file:", err)
-		}
-		defer os.Remove(f.Name())
-
-		_, err = f.Write(data)
-		if err != nil {
-			log.Fatal("error writing to temporary file:", err)
-		}
-		f.Close()
-
-		queryPath = f.Name()
-	}
-
-	query, err := corpus.NewDocument(queryPath, &config)
+	// If no query file was provided, read from stdin
+	query, err := queryDoc(*queryFlag, &config)
 	if err != nil {
 		log.Fatal("error parsing query:", err)
 	}

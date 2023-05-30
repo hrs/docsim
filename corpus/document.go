@@ -3,6 +3,7 @@ package corpus
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
 	"mime"
 	"os"
@@ -22,7 +23,7 @@ type Document struct {
 	norm     float64
 }
 
-func NewDocument(path string, config *Config) (*Document, error) {
+func ParseDocument(path string, config *Config) (*Document, error) {
 	// Ensure that this is a text file
 	if !isTextFile(path) {
 		return nil, fmt.Errorf("not a text file, skipping: %s", path)
@@ -35,8 +36,19 @@ func NewDocument(path string, config *Config) (*Document, error) {
 	}
 	defer file.Close()
 
+	// Parse the contents
+	doc, err := NewDocument(file, config)
+	if err != nil {
+		return nil, err
+	}
+
+	doc.path = path
+	return doc, nil
+}
+
+func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 	// Create a scanner from the file
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(rd)
 
 	// Set the split function for the scanning operation
 	scanner.Split(bufio.ScanWords)
@@ -84,7 +96,7 @@ func NewDocument(path string, config *Config) (*Document, error) {
 		termFreq[term] = count / totalWordCount
 	}
 
-	return &Document{path: path, termFreq: termFreq}, nil
+	return &Document{termFreq: termFreq}, nil
 }
 
 func splitToken(r rune) bool {
