@@ -2,8 +2,122 @@ package corpus
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
+
+func TestNewDocument(t *testing.T) {
+	sampleText := "It had two positions, and scrawled in pencil on the metal switch body were the words 'magic' and 'more magic'."
+
+	tests := []struct {
+		config Config
+		expMap termMap
+	}{
+		{
+			Config{Stoplist: DefaultStoplist},
+			termMap{
+				"bodi":   0.1250,
+				"magic":  0.2500,
+				"metal":  0.1250,
+				"pencil": 0.1250,
+				"posit":  0.1250,
+				"scrawl": 0.1250,
+				"switch": 0.1250,
+			},
+		},
+		{
+			Config{
+				Stoplist: newStoplist(
+					[]string{
+						"and",
+						"in",
+						"on",
+						"the",
+						"were",
+					},
+				),
+			},
+			termMap{
+				"bodi":   0.0769,
+				"had":    0.0769,
+				"it":     0.0769,
+				"magic":  0.1538,
+				"metal":  0.0769,
+				"more":   0.0769,
+				"pencil": 0.0769,
+				"posit":  0.0769,
+				"scrawl": 0.0769,
+				"switch": 0.0769,
+				"two":    0.0769,
+				"word":   0.0769,
+			},
+		},
+		{
+			Config{
+				NoStoplist: true,
+			},
+			termMap{
+				"and":    0.1000,
+				"bodi":   0.0500,
+				"had":    0.0500,
+				"in":     0.0500,
+				"it":     0.0500,
+				"magic":  0.1000,
+				"metal":  0.0500,
+				"more":   0.0500,
+				"on":     0.0500,
+				"pencil": 0.0500,
+				"posit":  0.0500,
+				"scrawl": 0.0500,
+				"switch": 0.0500,
+				"the":    0.1000,
+				"two":    0.0500,
+				"were":   0.0500,
+				"word":   0.0500,
+			},
+		},
+		{
+			Config{
+				NoStemming: true,
+				Stoplist:   DefaultStoplist,
+			},
+			termMap{
+				"body":      0.1250,
+				"magic":     0.2500,
+				"metal":     0.1250,
+				"pencil":    0.1250,
+				"positions": 0.1250,
+				"scrawled":  0.1250,
+				"switch":    0.1250,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		got, err := NewDocument(strings.NewReader(sampleText), &tc.config)
+		if err != nil {
+			t.Errorf("got unexpected error %v", err)
+		}
+
+		for gotTerm := range got.termFreq {
+			_, expKey := tc.expMap[gotTerm]
+			if !expKey {
+				t.Errorf("parsed unexpected term '%s'", gotTerm)
+			}
+		}
+
+		for expTerm, expFreq := range tc.expMap {
+			gotFreq, ok := got.termFreq[expTerm]
+			if !ok {
+				t.Errorf("found unexpected term '%s' in termFreq", expTerm)
+			}
+
+			if !approxEq(gotFreq, expFreq) {
+				t.Errorf("for term '%s' got %.4f, wanted %.4f", expTerm, gotFreq, expFreq)
+			}
+		}
+	}
+}
 
 func TestNormalizeTfIdf(t *testing.T) {
 	tm := termMap{

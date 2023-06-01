@@ -53,15 +53,16 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 	// Set the split function for the scanning operation
 	scanner.Split(bufio.ScanWords)
 
-	// Initialize the words slice
 	termCount := make(termMap)
 	totalWordCount := 0.0
 
-	// Loop over the words and append each to the words slice
+	// Loop over the words, stem them if configured, pass them through the
+	// stoplist if configured, and, for each that "should" "count", increment it
+	// in the term map.
 	for scanner.Scan() {
 		token := strings.ToLower(scanner.Text())
 
-		// Split each token on non-alphanumeric characters (except single qutoes, to
+		// Split each token on non-alphanumeric characters (except single quotes, to
 		// handle contractions)
 		for _, word := range strings.FieldsFunc(token, splitToken) {
 			// Since we didn't split on single quotes, we need to trim them off now.
@@ -71,16 +72,14 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 			// Similarly, we need to remove the common "'s" possessive case
 			word = strings.TrimSuffix(word, "'s")
 
-			if word != "" {
-				if config.NoStoplist || !config.Stoplist.include(word) {
-					if config.NoStemming {
-						termCount[word]++
-					} else {
-						termCount[stem(word)]++
-					}
-
-					totalWordCount++
+			if word != "" && (config.NoStoplist || !config.Stoplist.include(word)) {
+				if config.NoStemming {
+					termCount[word]++
+				} else {
+					termCount[stem(word)]++
 				}
+
+				totalWordCount++
 			}
 		}
 	}
@@ -90,7 +89,7 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 		return nil, err
 	}
 
-	// Build the term frequency map
+	// Scale the term frequency map according to the total number of terms in the document.
 	termFreq := make(termMap)
 	for term, count := range termCount {
 		termFreq[term] = count / totalWordCount
