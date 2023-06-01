@@ -30,29 +30,21 @@ func queryDoc(path string, config *corpus.Config) (*corpus.Document, error) {
 }
 
 func main() {
-	bestFirstFlag := flag.Bool("best-first", false, "print best matches first")
-	followSymlinksFlag := flag.Bool("follow-symlinks", false, "included symlinked files in results")
-	limitFlag := flag.Int("limit", 0, "return at most `limit` results")
-	noStemmingFlag := flag.Bool("no-stemming", false, "don't perform stemming on words")
-	noStoplistFlag := flag.Bool("no-stoplist", false, "don't omit common words by using a stoplist")
-	omitQueryFlag := flag.Bool("omit-query", false, "don't include the query file itself in search results")
+	var config corpus.Config
+
+	flag.BoolVar(&config.BestFirst, "best-first", false, "print best matches first")
+	flag.BoolVar(&config.FollowSymlinks, "follow-symlinks", false, "included symlinked files in results")
+	flag.IntVar(&config.Limit, "limit", 0, "return at most `limit` results")
+	flag.BoolVar(&config.NoStemming, "no-stemming", false, "don't perform stemming on words")
+	flag.BoolVar(&config.NoStoplist, "no-stoplist", false, "don't omit common words by using a stoplist")
+	flag.BoolVar(&config.OmitQuery, "omit-query", false, "don't include the query file itself in search results")
+	flag.BoolVar(&config.ShowScores, "show-scores", false, "print scores next to file paths")
+	flag.BoolVar(&config.Verbose, "verbose", false, "include debugging information and errors")
 	queryFlag := flag.String("query", "", "path to the file that results should match")
-	showScoresFlag := flag.Bool("show-scores", false, "print scores next to file paths")
 	stoplistFlag := flag.String("stoplist", "", "path to a file of words to be ignored")
-	verboseFlag := flag.Bool("verbose", false, "include debugging information and errors")
 	flag.Parse()
 
-	config := corpus.Config{
-		BestFirst:      *bestFirstFlag,
-		FollowSymlinks: *followSymlinksFlag,
-		Limit:          *limitFlag,
-		NoStemming:     *noStemmingFlag,
-		NoStoplist:     *noStoplistFlag,
-		OmitQuery:      *omitQueryFlag,
-		ShowScores:     *showScoresFlag,
-		Stoplist:       stoplist(*stoplistFlag),
-		Verbose:        *verboseFlag,
-	}
+	config.Stoplist = stoplist(*stoplistFlag)
 
 	if !config.Verbose {
 		// Suppress log timestamps and noisy output
