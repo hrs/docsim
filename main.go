@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/hrs/docsim/corpus"
 )
+
+var version = "0.1.3"
 
 func stoplist(flag string) *corpus.Stoplist {
 	if flag == "" {
@@ -42,9 +45,15 @@ func main() {
 	flag.BoolVar(&config.Verbose, "verbose", false, "include debugging information and errors")
 	queryFlag := flag.String("query", "", "path to the file that results should match")
 	stoplistFlag := flag.String("stoplist", "", "path to a file of words to be ignored")
+	versionFlag := flag.Bool("version", false, "print the current version and exit")
 	flag.Parse()
 
 	config.Stoplist = stoplist(*stoplistFlag)
+
+	if *versionFlag {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	if !config.Verbose {
 		// Suppress log timestamps and noisy output
