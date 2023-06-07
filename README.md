@@ -71,6 +71,10 @@ algorithm, you'll almost certainly want to use the `--no-stoplist` and
 Optionally, you can use the `--stoplist` flag to provide a custom stoplist. A
 custom stoplist is just a text file of words to ignore, separated by whitespace.
 
+**WARNING:** `docsim` doesn't respect `.ignore` files yet, so it'll try to
+search through `.git` directories, `node_modules`, and so on. That should be
+fixed in the near future.
+
 ## Installation
 
 The easiest thing is probably to grab a [compiled binary][] appropriate to your
@@ -93,11 +97,13 @@ $ go install github.com/hrs/docsim/docsim@latest
 ```
 
 Note that using `go install` doesn't include the [`man` page][], which you can
-optionally install manually by copying into e.g. `/usr/local/share/man/man1`.
+optionally install manually by copying it into e.g. `/usr/local/share/man/man1`.
 
 [`man` page]: ./man/docsim.1
 
 ## Running tests
+
+Just use the supplied `make` task:
 
 ``` console
 $ make test
