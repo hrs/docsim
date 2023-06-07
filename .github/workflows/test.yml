@@ -1,0 +1,28 @@
+name: Tests
+on: [push, pull_request]
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - "1.17"
+          - "1.18"
+          - "1.19"
+          - "1.20"
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Run tests
+        run: 'make && make test'

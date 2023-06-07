@@ -1,5 +1,8 @@
 # `docsim`
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![CI Status](https://github.com/hrs/docsim/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/hrs/docsim/actions/workflows/test.yml)
+
 A simple, fast command-line tool for scoring the similarity of text documents.
 
 ``` console
