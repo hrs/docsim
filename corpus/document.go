@@ -22,6 +22,14 @@ type Document struct {
 	norm     float64
 }
 
+var explicitlyPermittedExtensions = map[string]bool{
+	"markdown": true,
+	"md":       true,
+	"org":      true,
+	"tex":      true,
+	"txt":      true,
+}
+
 func ParseDocument(path string, config *Config) (*Document, error) {
 	// Ensure that this is a text file
 	if !isTextFile(path) {
@@ -126,7 +134,12 @@ func (doc *Document) calcNorm() float64 {
 }
 
 func isTextFile(path string) bool {
-	// First, try to get the file's MIME type from its extension, if that's
+	// If the file's extension is explicitly permitted, just use that.
+	if permitted, _ := explicitlyPermittedExtensions[filepath.Ext(path)]; permitted {
+		return true
+	}
+
+	// Try to get the file's MIME type from its extension, if that's
 	// available.
 	mimeType := mime.TypeByExtension(filepath.Ext(path))
 
