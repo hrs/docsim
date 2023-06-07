@@ -38,7 +38,8 @@ $ docsim --query some-file.txt
 [...]
 ```
 
-Without a provided `--query` document `docsim` takes input from STDIN:
+Without a provided `--query` document `docsim` takes input from `STDIN`. This
+means `docsim` can be used as an ad-hoc local search engine.
 
 ``` console
 $ echo "Here's a query to search for." | docsim ~/documents/notes
