@@ -135,7 +135,7 @@ func (doc *Document) calcNorm() float64 {
 
 func isTextFile(path string) bool {
 	// If the file's extension is explicitly permitted, just use that.
-	if permitted, _ := explicitlyPermittedExtensions[filepath.Ext(path)]; permitted {
+	if hasPermittedExtension(path) {
 		return true
 	}
 
@@ -168,4 +168,10 @@ func isTextFile(path string) bool {
 	}
 
 	return strings.HasPrefix(mimeType, "text/")
+}
+
+func hasPermittedExtension(path string) bool {
+	ext := strings.TrimPrefix(filepath.Ext(path), ".")
+	permitted, ok := explicitlyPermittedExtensions[ext]
+	return ok && permitted
 }
