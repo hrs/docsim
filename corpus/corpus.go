@@ -1,8 +1,10 @@
 package corpus
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -44,7 +46,11 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 	for _, path := range paths {
 		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
 			if xerr != nil {
-				panic(xerr)
+				if errors.Is(xerr, os.ErrNotExist) {
+					log.Fatal("no such file or directory: ", path)
+				} else {
+					panic(xerr)
+				}
 			}
 
 			// Don't parse directories or symlinks (or the queried file, if so configured)
