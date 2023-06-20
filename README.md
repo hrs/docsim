@@ -3,19 +3,15 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![CI Status](https://github.com/hrs/docsim/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/hrs/docsim/actions/workflows/test.yml)
 
-A simple, fast command-line tool for scoring the similarity of text documents.
+A simple, local, in-memory search engine. Query and compare your text documents
+from the terminal, with results ranked by textual similarity.
 
 ``` console
-$ docsim --query some-file.txt --show-scores ~/documents/notes
-0.000  completely-dissimilar-file.txt
-0.152  somewhat-similar-file.md
-0.469  pretty-similar-file.md
-0.872  very-similar-file.org
-1.000  potentially-identical-file.txt
+$ docsim --show-scores --limit 3 --best-first "search query" ~/documents/notes
+0.472  very-relevant-file.txt
+0.123  slightly-similar-file.org
+0.000  completely-unrelated-file.md
 ```
-
-Given a query document and a collection of potential matches, `docsim` ranks
-each document in the collection by its textual similarity to the query.
 
 ## Examples
 
@@ -24,42 +20,33 @@ you started.
 
 [`man` page]: ./man/docsim.1
 
-Search for similar files in a given directory:
-
-``` console
-$ docsim --query some-file.txt ~/documents/notes
-[...]
-```
-
 If no paths are provided `docsim` will search the current working directory.
 
 ``` console
-$ docsim --query some-file.txt
+$ docsim "here's a search query"
 [...]
 ```
 
-Without a provided `--query` document `docsim` takes input from `STDIN`. This
-means `docsim` can be used as an ad-hoc local search engine.
+Use the `--stdin` flag to read the search query from `STDIN` instead of a string
+argument.
 
 ``` console
-$ echo "Here's a query to search for." | docsim ~/documents/notes
+$ echo "Here's a query to search for." | docsim --stdin ~/documents/notes
 [...]
 ```
 
-Only show the top 3 matches, with the best at the top:
+Search for similar files in a given directory:
 
 ``` console
-$ docsim --query some-file.txt --limit 3 --best-first ~/documents/notes
-potentially-identical-file.txt
-very-similar-file.org
-pretty-similar-file.md
+$ docsim --file some-file.txt ~/documents/notes
+[...]
 ```
 
 Find Go files similar to `main.go` in the current directory. Don't use stemming
-or stoplists, since these aren't English documents.
+or stoplists, since these aren't English documents:
 
 ``` console
-$ docsim --query main.go --no-stemming --no-stoplist **/*.go
+$ docsim --file main.go --no-stemming --no-stoplist **/*.go
 [...]
 ```
 
@@ -71,9 +58,9 @@ algorithm, you'll almost certainly want to use the `--no-stoplist` and
 Optionally, you can use the `--stoplist` flag to provide a custom stoplist. A
 custom stoplist is just a text file of words to ignore, separated by whitespace.
 
-**WARNING:** `docsim` doesn't respect `.ignore` files yet, so it'll try to
-search through `.git` directories, `node_modules`, and so on. That should be
-fixed in the near future.
+**WARNING:** `docsim` doesn't respect `.ignore` or `.gitignore` files yet, so
+it'll try to search through `.git` directories, `node_modules`, and so on. That
+should be fixed in the near future.
 
 ## Installation
 
@@ -108,6 +95,24 @@ Just use the supplied `make` task:
 ``` console
 $ make test
 ```
+
+## How is this different from `grep` (or `ripgrep`, or `ag`, or...)?
+
+Those tools are all great, and I use them all the time! But they search for
+literal text matches, usually line-by-line. That's often what I want, but
+sometimes I want to know, "what notes are *most similar* to this query, or to
+this other note?"
+
+If I search for "chunky bacon," I still want to see documents that talk about
+"chunks of bacon." And, below those, I probably want to see notes that discuss
+regular "bacon," even if it's not chunky. `docsim` uses a few different
+[information retrieval algorithms][] to provide a ranked list of text documents.
+
+[information retrieval algorithms]: #how-it-works
+
+It's also slower and more memory-intensive than those other tools, of course,
+since it does more work. But performance *is* a goal, and on a mid-range machine
+it'll process a few thousand documents without notable lag.
 
 ## How it works
 

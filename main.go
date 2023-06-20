@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/hrs/docsim/corpus"
 )
 
-var version = "0.1.3"
+var version = "0.1.4"
 
 func stoplist(flag string) *corpus.Stoplist {
 	if flag == "" {
@@ -24,12 +25,21 @@ func stoplist(flag string) *corpus.Stoplist {
 	}
 }
 
-func queryDoc(path string, config *corpus.Config) (*corpus.Document, error) {
-	if path == "" {
-		return corpus.NewDocument(os.Stdin, config)
-	}
+func failWithUsageMessage() {
+	executable := os.Args[0]
 
-	return corpus.ParseDocument(path, config)
+	log.Fatalf(
+		"usage:\n"+
+			"\n"+
+			"    %s [OPTION...] QUERY [PATH...]\n"+
+			"    %s [OPTION...] --file PATH [PATH...]\n"+
+			"    command | %s [OPTION...] --stdin [PATH...]\n"+
+			"\n"+
+			"For more information try --help, or check the manual.",
+		executable,
+		executable,
+		executable,
+	)
 }
 
 func main() {
@@ -43,7 +53,8 @@ func main() {
 	flag.BoolVar(&config.OmitQuery, "omit-query", false, "don't include the query file itself in search results")
 	flag.BoolVar(&config.ShowScores, "show-scores", false, "print scores next to file paths")
 	flag.BoolVar(&config.Verbose, "verbose", false, "include debugging information and errors")
-	queryFlag := flag.String("query", "", "path to the file that results should match")
+	stdinFlag := flag.Bool("stdin", false, "read query from STDIN instead of from a positional string arugment")
+	fileFlag := flag.String("file", "", "path to the file that results should match")
 	stoplistFlag := flag.String("stoplist", "", "path to a file of words to be ignored")
 	versionFlag := flag.Bool("version", false, "print the current version and exit")
 	flag.Parse()
@@ -60,24 +71,57 @@ func main() {
 		log.SetFlags(0)
 	}
 
-	// If no query file was provided, read from stdin
-	query, err := queryDoc(*queryFlag, &config)
-	if err != nil {
-		log.Fatal("error parsing query:", err)
+	positionalArgs := flag.Args()
+
+	// Construct a query from either:
+	//
+	// - `--stdin`,
+	// - `--file`, or
+	// - the first positional argument
+	var query *corpus.Document
+	var err error
+	if *stdinFlag {
+		// Don't try to read from both `--stdin` and a `--file`
+		if *fileFlag != "" {
+			log.Println("error: can't read query from both --stdin and a --file")
+			failWithUsageMessage()
+		}
+
+		query, err = corpus.NewDocument(os.Stdin, &config)
+		if err != nil {
+			log.Fatal("error parsing STDIN:", err)
+		}
+	} else if *fileFlag != "" {
+		query, err = corpus.ParseDocument(*fileFlag, &config)
+		if err != nil {
+			log.Fatal("error parsing file:", err)
+		}
+	} else {
+		if len(positionalArgs) == 0 {
+			log.Println("error: no query found")
+			failWithUsageMessage()
+		}
+
+		query, err = corpus.NewDocument(strings.NewReader(positionalArgs[0]), &config)
+		if err != nil {
+			log.Fatal("error parsing query:", err)
+		}
+
+		// Remove the query term from the list of paths to be searched
+		positionalArgs = positionalArgs[1:]
 	}
 
 	// If no search paths were provided, search the current directory
-	searchPaths := flag.Args()
-	if len(searchPaths) == 0 {
+	if len(positionalArgs) == 0 {
 		currentDir, err := os.Getwd()
 		if err != nil {
 			log.Fatal("error determining current directory:", err)
 		}
 
-		searchPaths = []string{currentDir}
+		positionalArgs = []string{currentDir}
 	}
 
-	c := corpus.ParseCorpus(query, searchPaths, &config)
+	c := corpus.ParseCorpus(query, positionalArgs, &config)
 
 	corpus.PrintResults(c.SimilarDocuments(query), config)
 }

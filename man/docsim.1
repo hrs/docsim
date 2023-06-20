@@ -1,13 +1,25 @@
 .TH DOCSIM 1
 .SH NAME
-docsim \- score similarity between text documents
+docsim \- query and compare text documents, with results ranked by textual similarity
 .SH SYNOPSIS
-.B docsim
-[\fIOPTIONS\fR] \fB\-\-query \fIFILE\fR [\fIPATH\fR...]
+.PP
+.B docsim \fR[\fIOPTIONS\fR] \fIQUERY\fR [\fIPATH\fR...]
+.PP
+.B docsim \fR[\fIOPTIONS\fR] \fB\-\-file\fR \fIFILE\fR [\fIPATH\fR...]
+.PP
+.B command \fR|\fB docsim \fR[\fIOPTIONS\fR] \fB\-\-stdin\fR [\fIPATH\fR...]
+.PP
+.B docsim \fR[\fIOPTIONS\fR] \fB\-\-help\fR
+.PP
+.B docsim \fR[\fIOPTIONS\fR] \fB\-\-version\fR
 .SH DESCRIPTION
 .B docsim
-compares one file (the \fIquery\fR) with every other text file in the current
-directory and sorts them according to their textual similarity.
+compares a \fIquery\fR against every text file in the current directory or the
+provided search paths and sorts them according to their textual similarity.
+.PP
+A \fIquery\fR may be either a positional argument, the contents of a file passed
+in with the \fB\-\-file\fR flag, or read from standard input with the
+\fB\-\-stdin\fR flag.
 .PP
 docsim's default behavior is parse the words out of each file (including the
 query), pass them through a stoplist to remove common English words, remove
@@ -23,7 +35,7 @@ good, but those features can be disabled with the \fB\-\-no\-stemming\fR and
 .IP
 .nf
 \f[C]
-docsim --query demando.txt --no-stoplist --no-stemming ~/esperanto_notes
+docsim --no-stoplist --no-stemming "interrogatione mea" ~/esperanto_notes
 \f[R]
 .fi
 .PP
@@ -33,7 +45,7 @@ identifiers and keywords will.
 .IP
 .nf
 \f[C]
-docsim --query main.c --no-stoplist --no-stemming **/*.c
+docsim --file main.c --no-stoplist --no-stemming **/*.c
 \f[R]
 .fi
 .PP
@@ -41,7 +53,7 @@ However, docsim does support custom stoplists with the \fB\-\-stoplist\fR flag.
 .IP
 .nf
 \f[C]
-docsim --query demando.txt --stoplist ~/esperanto_stoplist.txt --no-stemming ~/esperanto_notes
+docsim --stoplist ~/esperanto_stoplist.txt --no-stemming "interrogatione mea" ~/esperanto_notes
 \f[R]
 .fi
 .SH OPTIONS
@@ -50,11 +62,18 @@ docsim --query demando.txt --stoplist ~/esperanto_stoplist.txt --no-stemming ~/e
 When enabled, docsim will sort results from best to worst, instead of the
 default (worst to best).
 .TP
+.BR \-\-file " " \fIFILE\fR
+Read the query from the contents of \fIFILE\fR instead of from a positional argument.
+.PP
+.RS
+This conflicts with the \fB\-\-stdin\fR flag.
+.RE
+.TP
 .BR \-\-follow\-symlinks
 Parse symbolic links in the search path. Default behavior is to ignore symlinks.
 .TP
 .BR \-\-limit " " \fINUM\fR
-Show no more that the best NUM results.
+Show no more that the best \fINUM\fR results.
 .TP
 .BR \-\-no\-stemming
 Don't stem words. Stemming reduces inflected words to their word stem before
@@ -72,12 +91,20 @@ Don't filter out common words, like "the" and "because".
 .BR \-\-omit\-query
 Don't include the query document itself in the results, even if it's in a
 directory being searched.
-.TP
-.BR \-\-query " " \fIFILE\fR
-Use \fIFILE\fR as the query against which all other files will be compared.
+.PP
+.RS
+This has no effect unless used with the \fB\-\-file\fR flag.
+.RE
 .TP
 .BR \-\-show\-scores
 Include the cosine similarity between each document and the query in the results.
+.TP
+.BR \-\-stdin
+Read the query from standard input instead of from a positional argument.
+.PP
+.RS
+This conflicts with the \fB\-\-file\fR flag.
+.RE
 .TP
 .BR \-\-stoplist " " \fISTOPLIST\fR
 Provide a custom stoplist to use instead of the default English stoplist.
