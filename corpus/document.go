@@ -30,6 +30,8 @@ var explicitlyPermittedExtensions = map[string]bool{
 	"txt":      true,
 }
 
+const apostropheRunes = "'’"
+
 func ParseDocument(path string, config *Config) (*Document, error) {
 	// Ensure that this is a text file
 	if !isTextFile(path) {
@@ -73,8 +75,13 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 		// handle contractions)
 		for _, word := range strings.FieldsFunc(token, splitToken) {
 			// Since we didn't split on single quotes, we need to trim them off now.
-			// We'd like "don't" to stay "don't", but "'hello" to become "hello".
-			word = strings.Trim(word, "'")
+			// We'd like "don't" to stay "don't", but "'hello" to become "hello". We
+			// also now need to replace any "&rsquo;" characters with regular single
+			// quotes to match the stoplist's expectations.
+			word = strings.Map(
+				normalizeApostrophe,
+				strings.Trim(word, apostropheRunes),
+			)
 
 			// Similarly, we need to remove the common "'s" possessive case
 			word = strings.TrimSuffix(word, "'s")
@@ -106,7 +113,27 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 }
 
 func splitToken(r rune) bool {
-	return !(r >= 'a' && r <= 'z') && !(r >= '0' && r <= '9') && r != ' ' && r != '\''
+	if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+		return false
+	}
+
+	for _, apostrophe := range apostropheRunes {
+		if r == apostrophe {
+			return false
+		}
+	}
+
+	return true
+}
+
+func normalizeApostrophe(r rune) rune {
+	for _, apostrophe := range apostropheRunes {
+		if r == apostrophe {
+			return '\''
+		}
+	}
+
+	return r
 }
 
 func (doc *Document) normalizeTfIdf(invDocFreq termMap) {
