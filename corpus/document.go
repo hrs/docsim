@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 type termMap map[string]float64
@@ -55,75 +56,78 @@ func ParseDocument(path string, config *Config) (*Document, error) {
 	return doc, nil
 }
 
-func NewDocument(rd io.Reader, config *Config) (*Document, error) {
-	// Create a scanner from the file
+func parseTokens(rd io.Reader) ([]string, error) {
 	scanner := bufio.NewScanner(rd)
-
-	// Set the split function for the scanning operation
 	scanner.Split(bufio.ScanWords)
 
-	termCount := make(termMap)
-	totalWordCount := 0.0
+	tokens := []string{}
 
-	// Loop over the words, stem them if configured, pass them through the
-	// stoplist if configured, and, for each that "should" "count", increment it
-	// in the term map.
 	for scanner.Scan() {
-		token := strings.ToLower(scanner.Text())
+		// Lower-case each word and replace curly apostrophes with single quotes.
+		token := strings.Map(
+			normalizeApostrophe,
+			strings.ToLower(scanner.Text()),
+		)
 
 		// Split each token on non-alphanumeric characters (except single quotes, to
 		// handle contractions)
 		for _, word := range strings.FieldsFunc(token, splitToken) {
 			// Since we didn't split on single quotes, we need to trim them off now.
-			// We'd like "don't" to stay "don't", but "'hello" to become "hello". We
-			// also now need to replace any "&rsquo;" characters with regular single
-			// quotes to match the stoplist's expectations.
-			word = strings.Map(
-				normalizeApostrophe,
-				strings.Trim(word, apostropheRunes),
-			)
+			// We'd like "don't" to stay "don't", but "'hello" to become "hello".
+			word = strings.Trim(word, apostropheRunes)
 
 			// Similarly, we need to remove the common "'s" possessive case
 			word = strings.TrimSuffix(word, "'s")
 
-			if word != "" && (config.NoStoplist || !config.Stoplist.include(word)) {
-				if config.NoStemming {
-					termCount[word]++
-				} else {
-					termCount[stem(word)]++
-				}
-
-				totalWordCount++
+			if word != "" {
+				tokens = append(tokens, word)
 			}
 		}
+
 	}
 
-	// Check for errors in scanning
 	if err := scanner.Err(); err != nil {
 		return nil, err
+	}
+
+	return tokens, nil
+}
+
+func NewDocument(rd io.Reader, config *Config) (*Document, error) {
+	termCount := make(termMap)
+	totalTermCount := 0.0
+
+	tokens, err := parseTokens(rd)
+	if err != nil {
+		return nil, err
+	}
+
+	// Loop over the tokens, stem them if configured, pass them through the
+	// stoplist if configured, and, for each that "should" "count", increment it
+	// in the term map.
+	for _, token := range tokens {
+		if config.NoStoplist || !config.Stoplist.include(token) {
+			if config.NoStemming {
+				termCount[token]++
+			} else {
+				termCount[stem(token)]++
+			}
+
+			totalTermCount++
+		}
 	}
 
 	// Scale the term frequency map according to the total number of terms in the document.
 	termFreq := make(termMap)
 	for term, count := range termCount {
-		termFreq[term] = count / totalWordCount
+		termFreq[term] = count / totalTermCount
 	}
 
 	return &Document{termFreq: termFreq}, nil
 }
 
 func splitToken(r rune) bool {
-	if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-		return false
-	}
-
-	for _, apostrophe := range apostropheRunes {
-		if r == apostrophe {
-			return false
-		}
-	}
-
-	return true
+	return !(unicode.IsLetter(r) || unicode.IsNumber(r) || r == '\'')
 }
 
 func normalizeApostrophe(r rune) rune {

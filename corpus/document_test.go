@@ -6,6 +6,37 @@ import (
 	"testing"
 )
 
+func TestParseTokens(t *testing.T) {
+	tests := []struct {
+		text string
+		exp  []string
+	}{
+		{
+			"naïve née señor",
+			[]string{"naïve", "née", "señor"},
+		},
+		{
+			"1337 hAx0r",
+			[]string{"1337", "hax0r"},
+		},
+		{
+			"examples: isn't 'isn't' wasn’t 'wasn’t' ‘won't’ ‘won't’ ‘shan’t’ ‘shan’t’",
+			[]string{"examples", "isn't", "isn't", "wasn't", "wasn't", "won't", "won't", "shan't", "shan't"},
+		},
+	}
+
+	for _, tc := range tests {
+		got, err := parseTokens(strings.NewReader(tc.text))
+		if err != nil {
+			t.Errorf("got unexpected error %v", err)
+		}
+
+		if !reflect.DeepEqual(got, tc.exp) {
+			t.Errorf("got %#v, wanted %#v", got, tc.exp)
+		}
+	}
+}
+
 func TestNewDocument(t *testing.T) {
 	sampleText := "It had two positions, and scrawled in pencil on the metal switch body were the words 'magic' and 'more magic'."
 
@@ -115,46 +146,6 @@ func TestNewDocument(t *testing.T) {
 			if !approxEq(gotFreq, expFreq) {
 				t.Errorf("for term '%s' got %.4f, wanted %.4f", expTerm, gotFreq, expFreq)
 			}
-		}
-	}
-}
-
-func TestParsingApostrophes(t *testing.T) {
-	sampleText := "examples: isn't 'isn't' wasn’t 'wasn’t' ‘won't’ ‘won't’ ‘shan’t’ ‘shan’t’"
-
-	config := &Config{
-		NoStemming: true,
-		NoStoplist: true,
-	}
-
-	expected := termMap{
-		"examples": 0.1111,
-		"isn't":    0.2222,
-		"wasn't":   0.2222,
-		"won't":    0.2222,
-		"shan't":   0.2222,
-	}
-
-	got, err := NewDocument(strings.NewReader(sampleText), config)
-	if err != nil {
-		t.Errorf("got unexpected error %v", err)
-	}
-
-	for gotTerm := range got.termFreq {
-		_, expKey := expected[gotTerm]
-		if !expKey {
-			t.Errorf("parsed unexpected term '%s'", gotTerm)
-		}
-	}
-
-	for expTerm, expFreq := range expected {
-		gotFreq, ok := got.termFreq[expTerm]
-		if !ok {
-			t.Errorf("found unexpected term '%s' in termFreq", expTerm)
-		}
-
-		if !approxEq(gotFreq, expFreq) {
-			t.Errorf("for term '%s' got %.4f, wanted %.4f", expTerm, gotFreq, expFreq)
 		}
 	}
 }
