@@ -40,10 +40,31 @@ func NewCorpus(documents []*Document) *Corpus {
 	return &Corpus{documents, invDocFreq}
 }
 
-func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
+func ParseCorpus(query *Document, searchPaths []string, config *Config) *Corpus {
 	var documents []*Document
 
-	for _, path := range paths {
+	for _, filepath := range findParsableFiles(searchPaths, config) {
+		// Don't include the queried file, if so configured.
+		if !(config.OmitQuery && sameFile(query.path, filepath)) {
+			doc, err := ParseDocument(filepath, config)
+
+			if err != nil {
+				if config.Verbose {
+					fmt.Fprintln(os.Stderr, err)
+				}
+			} else {
+				documents = append(documents, doc)
+			}
+		}
+	}
+
+	return NewCorpus(documents)
+}
+
+func findParsableFiles(searchPaths []string, config *Config) []string {
+	filePaths := []string{}
+
+	for _, path := range searchPaths {
 		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
 			if xerr != nil {
 				if errors.Is(xerr, os.ErrNotExist) {
@@ -53,17 +74,9 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 				}
 			}
 
-			// Don't parse directories or symlinks (or the queried file, if so configured)
-			if isParsableFile(xinfo, config) && !(config.OmitQuery && sameFile(query.path, xpath)) {
-				doc, err := ParseDocument(xpath, config)
-
-				if err != nil {
-					if config.Verbose {
-						fmt.Fprintln(os.Stderr, err)
-					}
-				} else {
-					documents = append(documents, doc)
-				}
+			// Don't include directories (or symlinks, unless so configured).
+			if isParsableFile(xinfo, config) {
+				filePaths = append(filePaths, xpath)
 			}
 
 			return nil
@@ -74,7 +87,7 @@ func ParseCorpus(query *Document, paths []string, config *Config) *Corpus {
 		}
 	}
 
-	return NewCorpus(documents)
+	return filePaths
 }
 
 func isParsableFile(info fs.DirEntry, config *Config) bool {
