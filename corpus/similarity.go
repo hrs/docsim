@@ -1,5 +1,7 @@
 package corpus
 
+import "math"
+
 func (corpus *Corpus) SimilarDocuments(query *Document) []score {
 	// Normalize query document to set TF-IDF weights per the corpus
 	query.normalizeTfIdf(corpus.invDocFreq)
@@ -25,5 +27,10 @@ func (target *Document) cosineSimilarity(other *Document) float64 {
 		dotProd += (weight * other.tfIdf[term])
 	}
 
-	return dotProd / (target.norm * other.norm)
+	sim := dotProd / (target.norm * other.norm)
+	if math.IsNaN(sim) {
+		return 0.0
+	}
+
+	return sim
 }
