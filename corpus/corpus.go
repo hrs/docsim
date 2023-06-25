@@ -41,50 +41,55 @@ func NewCorpus(documents []*Document) *Corpus {
 }
 
 func ParseCorpus(query *Document, searchPaths []string, config *Config) *Corpus {
-	var documents []*Document
+	documents := []*Document{query}
 
-	for _, filepath := range findParsableFiles(searchPaths, config) {
-		// Don't include the queried file, if so configured.
-		if !(config.OmitQuery && sameFile(query.path, filepath)) {
-			doc, err := ParseDocument(filepath, config)
-
-			if err != nil {
-				if config.Verbose {
-					fmt.Fprintln(os.Stderr, err)
-				}
-			} else {
-				documents = append(documents, doc)
-			}
-		}
+	for _, searchPath := range searchPaths {
+		documents = append(documents, parseDocuments(query, searchPath, config)...)
 	}
 
 	return NewCorpus(documents)
 }
 
-func findParsableFiles(searchPaths []string, config *Config) []string {
-	filePaths := []string{}
+func parseDocuments(query *Document, searchPath string, config *Config) []*Document {
+	var documents []*Document
 
-	for _, path := range searchPaths {
-		err := filepath.WalkDir(path, func(xpath string, xinfo fs.DirEntry, xerr error) error {
-			if xerr != nil {
-				if errors.Is(xerr, os.ErrNotExist) {
-					log.Fatal("no such file or directory: ", path)
-				} else {
-					panic(xerr)
-				}
-			}
-
-			// Don't include directories (or symlinks, unless so configured).
-			if isParsableFile(xinfo, config) {
-				filePaths = append(filePaths, xpath)
-			}
-
-			return nil
-		})
+	for _, path := range findParsableFiles(searchPath, config) {
+		doc, err := ParseDocument(path, config)
 
 		if err != nil {
-			panic(err)
+			if config.Verbose {
+				fmt.Fprintln(os.Stderr, err)
+			}
+		} else {
+			documents = append(documents, doc)
 		}
+	}
+
+	return documents
+}
+
+func findParsableFiles(searchPath string, config *Config) []string {
+	filePaths := []string{}
+
+	err := filepath.WalkDir(searchPath, func(path string, info fs.DirEntry, err error) error {
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				log.Fatal("no such file or directory: ", searchPath)
+			} else {
+				panic(err)
+			}
+		}
+
+		// Don't include directories (or symlinks, unless so configured).
+		if isParsableFile(info, config) {
+			filePaths = append(filePaths, path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
 	}
 
 	return filePaths
@@ -95,18 +100,4 @@ func isParsableFile(info fs.DirEntry, config *Config) bool {
 	// user's chosen to include
 	return info.Type().IsRegular() ||
 		(config.FollowSymlinks && (info.Type()&os.ModeSymlink != 0))
-}
-
-func sameFile(a, b string) bool {
-	aFileInfo, err := os.Stat(a)
-	if err != nil {
-		return false
-	}
-
-	bFileInfo, err := os.Stat(b)
-	if err != nil {
-		return false
-	}
-
-	return os.SameFile(aFileInfo, bFileInfo)
 }

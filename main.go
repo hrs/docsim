@@ -50,7 +50,12 @@ func main() {
 	flag.IntVar(&config.Limit, "limit", 0, "return at most `limit` results")
 	flag.BoolVar(&config.NoStemming, "no-stemming", false, "don't perform stemming on words")
 	flag.BoolVar(&config.NoStoplist, "no-stoplist", false, "don't omit common words by using a stoplist")
-	flag.BoolVar(&config.OmitQuery, "omit-query", false, "don't include the query file itself in search results")
+
+	// This is being kept as a flag (as of v0.1.5) for backward compatibility with
+	// docsim.el, but the functionality's been removed; regardless of the flag, we
+	// never include the query in search results.
+	flag.Bool("omit-query", true, "[deprecated] don't include the query file itself in search results")
+
 	flag.BoolVar(&config.ShowScores, "show-scores", false, "print scores next to file paths")
 	flag.BoolVar(&config.Verbose, "verbose", false, "include debugging information and errors")
 	stdinFlag := flag.Bool("stdin", false, "read query from STDIN instead of from a positional string arugment")

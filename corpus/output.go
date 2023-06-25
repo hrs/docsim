@@ -6,7 +6,6 @@ import (
 )
 
 type score struct {
-	query    *Document
 	document *Document
 	score    float64
 }

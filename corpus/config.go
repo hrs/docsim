@@ -6,7 +6,6 @@ type Config struct {
 	Limit          int
 	NoStemming     bool
 	NoStoplist     bool
-	OmitQuery      bool
 	ShowScores     bool
 	Stoplist       *Stoplist
 	Verbose        bool
