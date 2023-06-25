@@ -2,7 +2,6 @@ package corpus
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"log"
 	"math"
@@ -54,11 +53,14 @@ func parseDocuments(query *Document, searchPath string, config *Config) []*Docum
 	var documents []*Document
 
 	for _, path := range findParsableFiles(searchPath, config) {
+		if config.Verbose {
+			log.Println("parsing file:", path)
+		}
 		doc, err := ParseDocument(path, config)
 
 		if err != nil {
 			if config.Verbose {
-				fmt.Fprintln(os.Stderr, err)
+				log.Printf("error parsing %s: %s\n", path, err)
 			}
 		} else {
 			documents = append(documents, doc)
@@ -74,7 +76,7 @@ func findParsableFiles(searchPath string, config *Config) []string {
 	err := filepath.WalkDir(searchPath, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				log.Fatal("no such file or directory: ", searchPath)
+				log.Fatal("no such file or directory:", searchPath)
 			} else {
 				panic(err)
 			}

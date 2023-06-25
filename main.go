@@ -19,7 +19,7 @@ func stoplist(flag string) *corpus.Stoplist {
 		var err error
 		stoplist, err := corpus.ParseStoplist(flag)
 		if err != nil {
-			log.Fatal("Error reading custom stoplist:", err)
+			log.Fatal("error reading custom stoplist:", err)
 		}
 		return stoplist
 	}
@@ -71,10 +71,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if !config.Verbose {
-		// Suppress log timestamps and noisy output
-		log.SetFlags(0)
-	}
+	// Suppress log timestamps and noisy output
+	log.SetFlags(0)
 
 	positionalArgs := flag.Args()
 
@@ -99,7 +97,7 @@ func main() {
 	} else if *fileFlag != "" {
 		query, err = corpus.ParseDocument(*fileFlag, &config)
 		if err != nil {
-			log.Fatal("error parsing file:", err)
+			log.Fatal("error parsing query file:", err)
 		}
 	} else {
 		if len(positionalArgs) == 0 {
