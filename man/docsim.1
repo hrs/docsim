@@ -62,7 +62,7 @@ docsim --stoplist ~/esperanto_stoplist.txt --no-stemming "interrogatione mea" ~/
 When enabled, docsim will sort results from best to worst, instead of the
 default (worst to best).
 .TP
-.BR \-\-file " " \fIFILE\fR
+.BR \-f, " " \fB\-\-file\fR " " \fIFILE\fR
 Read the query from the contents of \fIFILE\fR instead of from a positional argument.
 .PP
 .RS
@@ -72,7 +72,14 @@ This conflicts with the \fB\-\-stdin\fR flag.
 .BR \-\-follow\-symlinks
 Parse symbolic links in the search path. Default behavior is to ignore symlinks.
 .TP
-.BR \-\-limit " " \fINUM\fR
+.BR -i, " " \fB\-\-stdin\fR
+Read the query from standard input instead of from a positional argument.
+.PP
+.RS
+This conflicts with the \fB\-\-file\fR flag.
+.RE
+.TP
+.BR -l, " " \fB\-\-limit\fR " " \fINUM\fR
 Show no more that the best \fINUM\fR results.
 .TP
 .BR \-\-no\-stemming
@@ -91,13 +98,6 @@ Don't filter out common words, like "the" and "because".
 .BR \-\-show\-scores
 Include the cosine similarity between each document and the query in the results.
 .TP
-.BR \-\-stdin
-Read the query from standard input instead of from a positional argument.
-.PP
-.RS
-This conflicts with the \fB\-\-file\fR flag.
-.RE
-.TP
 .BR \-\-stoplist " " \fISTOPLIST\fR
 Provide a custom stoplist to use instead of the default English stoplist.
 \fISTOPLIST\fR should be a text file with one word per line. Those words will be
@@ -112,7 +112,7 @@ Note that if the \fB\-\-no\-stoplist\fR flag is also set it will supersede this
 one and the custom stoplist will be ignored.
 .RE
 .TP
-.BR \-\-verbose
+.BR \-v, " " \fB\-\-verbose\fR
 Print extra debugging information.
 .TP
 .BR \-\-version

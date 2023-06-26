@@ -10,7 +10,35 @@ import (
 	"github.com/hrs/docsim/corpus"
 )
 
-var version = "0.1.4"
+var version = "0.1.6"
+
+const usage = `Usage:
+    docsim [OPTION...] QUERY [PATH...]
+    docsim [OPTION...] --file PATH [PATH...]
+    command | docsim [OPTION...] --stdin [PATH...]
+Options:
+    --best-first
+        print best matches first
+    -f, --file FILE
+        path to the FILE that results should match
+    --follow-symlinks
+        include symlinked files in results
+    -i, --stdin
+        read query from STDIN instead of from a positional string arugment
+    -l, --limit LIMIT
+        return at most LIMIT results
+    --no-stemming
+        don't perform stemming on words
+    --no-stoplist
+        don't omit common words by using a stoplist
+    --show-scores
+        print scores next to file paths
+    --stoplist
+        path to a file of words to be ignored
+    -v, --verbose
+        include debugging information and errors
+    --version
+        print the current version and exit`
 
 func stoplist(flag string) *corpus.Stoplist {
 	if flag == "" {
@@ -25,28 +53,12 @@ func stoplist(flag string) *corpus.Stoplist {
 	}
 }
 
-func failWithUsageMessage() {
-	executable := os.Args[0]
-
-	log.Fatalf(
-		"usage:\n"+
-			"\n"+
-			"    %s [OPTION...] QUERY [PATH...]\n"+
-			"    %s [OPTION...] --file PATH [PATH...]\n"+
-			"    command | %s [OPTION...] --stdin [PATH...]\n"+
-			"\n"+
-			"For more information try --help, or check the manual.",
-		executable,
-		executable,
-		executable,
-	)
-}
-
 func main() {
 	var config corpus.Config
 
 	flag.BoolVar(&config.BestFirst, "best-first", false, "print best matches first")
 	flag.BoolVar(&config.FollowSymlinks, "follow-symlinks", false, "included symlinked files in results")
+	flag.IntVar(&config.Limit, "l", 0, "return at most `limit` results")
 	flag.IntVar(&config.Limit, "limit", 0, "return at most `limit` results")
 	flag.BoolVar(&config.NoStemming, "no-stemming", false, "don't perform stemming on words")
 	flag.BoolVar(&config.NoStoplist, "no-stoplist", false, "don't omit common words by using a stoplist")
@@ -57,11 +69,25 @@ func main() {
 	flag.Bool("omit-query", true, "[deprecated] don't include the query file itself in search results")
 
 	flag.BoolVar(&config.ShowScores, "show-scores", false, "print scores next to file paths")
+	flag.BoolVar(&config.Verbose, "v", false, "include debugging information and errors")
 	flag.BoolVar(&config.Verbose, "verbose", false, "include debugging information and errors")
-	stdinFlag := flag.Bool("stdin", false, "read query from STDIN instead of from a positional string arugment")
-	fileFlag := flag.String("file", "", "path to the file that results should match")
+
+	var stdinFlag bool
+	flag.BoolVar(&stdinFlag, "i", false, "read query from STDIN instead of from a positional string arugment")
+	flag.BoolVar(&stdinFlag, "stdin", false, "read query from STDIN instead of from a positional string arugment")
+
+	var fileFlag string
+	flag.StringVar(&fileFlag, "f", "", "path to the file that results should match")
+	flag.StringVar(&fileFlag, "file", "", "path to the file that results should match")
+
 	stoplistFlag := flag.String("stoplist", "", "path to a file of words to be ignored")
 	versionFlag := flag.Bool("version", false, "print the current version and exit")
+
+	flag.Usage = func() {
+		w := flag.CommandLine.Output()
+		fmt.Fprintln(w, usage)
+	}
+
 	flag.Parse()
 
 	config.Stoplist = stoplist(*stoplistFlag)
@@ -83,26 +109,28 @@ func main() {
 	// - the first positional argument
 	var query *corpus.Document
 	var err error
-	if *stdinFlag {
+	if stdinFlag {
 		// Don't try to read from both `--stdin` and a `--file`
-		if *fileFlag != "" {
+		if fileFlag != "" {
 			log.Println("error: can't read query from both --stdin and a --file")
-			failWithUsageMessage()
+			flag.Usage()
+			os.Exit(1)
 		}
 
 		query, err = corpus.NewDocument(os.Stdin, &config)
 		if err != nil {
 			log.Fatal("error parsing STDIN:", err)
 		}
-	} else if *fileFlag != "" {
-		query, err = corpus.ParseDocument(*fileFlag, &config)
+	} else if fileFlag != "" {
+		query, err = corpus.ParseDocument(fileFlag, &config)
 		if err != nil {
 			log.Fatal("error parsing query file:", err)
 		}
 	} else {
 		if len(positionalArgs) == 0 {
 			log.Println("error: no query found")
-			failWithUsageMessage()
+			flag.Usage()
+			os.Exit(1)
 		}
 
 		query, err = corpus.NewDocument(strings.NewReader(positionalArgs[0]), &config)
