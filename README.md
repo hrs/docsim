@@ -91,12 +91,20 @@ should be fixed in the near future.
 
 ## Installation
 
-The easiest thing is probably to grab a [compiled binary][] appropriate to your
-platform.
+If you're using [Homebrew](https://brew.sh/):
 
-[compiled binary]: https://github.com/hrs/docsim/releases/latest
+``` console
+$ brew tap hrs/docsim
+# brew install docsim
+```
 
-But if you've got a Go toolchain handy, you can also either:
+Otherwise, grab an appropriate package from the [latest release][], which
+includes `.deb` and `.rpm` packages, and precompiled binaries appropriate for
+most popular platforms.
+
+[latest release]: https://github.com/hrs/docsim/releases/latest
+
+If you've got a Go toolchain handy, you can also either:
 
 ``` console
 $ git clone git@github.com:hrs/docsim.git
