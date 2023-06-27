@@ -1,0 +1,65 @@
+project_name: docsim
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    rlcp: true
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE.md
+      - manpages/*
+
+brews:
+  - folder: Formula
+    tap:
+      owner: hrs
+      name: homebrew-docsim
+      branch: main
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    goarm: "7"
+    description: A local, in-memory search tool, ranking results by textual similarity.
+    homepage: https://github.com/hrs/docsim
+    license: GPL-3.0-or-later
+    test: system "make test"
+    install: |-
+      bin.install "docsim"
+      man1.install "manpages/docsim.1"
+
+nfpms:
+  - maintainer: Harry R. Schwartz <hello@harryrschwartz.com>
+    description: A local, in-memory search tool, ranking results by textual similarity.
+    bindir: /usr/bin
+    section: utils
+    homepage: https://github.com/hrs/docsim
+    license: GPLv3
+    contents:
+      - src: ./manpages/docsim.1
+        dst: /usr/share/man/man1/docsim.1
+        file_info:
+          mode: 0644
+      - src: ./LICENSE.md
+        dst: /usr/share/doc/docsim/copyright
+        file_info:
+          mode: 0644
+    formats:
+      - deb
+      - rpm
