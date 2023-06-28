@@ -1,6 +1,6 @@
 package corpus
 
-import "github.com/reiver/go-porterstemmer"
+import "github.com/blevesearch/go-porterstemmer"
 
 var stemCache = make(map[string]string)
 
