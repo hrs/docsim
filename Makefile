@@ -19,7 +19,7 @@ $(BINARY): $(shell find . -iname "*.go")
 install: $(BINARY)
 	mkdir -p $(INSTDIR) $(MANDIR)
 	cp $(BINARY) $(INSTDIR)
-	install -m 644 man/$(MANPAGE) $(MANDIR)/$(MANPAGE)
+	install -m 644 manpages/$(MANPAGE) $(MANDIR)/$(MANPAGE)
 
 .PHONY: uninstall
 uninstall:
