@@ -1,5 +1,9 @@
 project_name: docsim
 
+before:
+  hooks:
+    - sh -c "gzip -c -n -9 ./manpages/docsim.1 > ./manpages/docsim.1.gz"
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -36,7 +40,7 @@ brews:
       branch: main
       token: "{{ .Env.GITHUB_TOKEN }}"
     goarm: "7"
-    description: A local, in-memory search tool, ranking results by textual similarity.
+    description: Local, in-memory search tool, ranking results by textual similarity.
     homepage: https://github.com/hrs/docsim
     license: GPL-3.0-or-later
     test: system "make test"
@@ -46,20 +50,28 @@ brews:
 
 nfpms:
   - maintainer: Harry R. Schwartz <hello@harryrschwartz.com>
-    description: A local, in-memory search tool, ranking results by textual similarity.
+    description: |-
+      Local, in-memory search tool, ranking results by textual similarity.
+      Docsim uses information retrieval techniques (like stemming and TF-IDF) to
+      parse text documents and rank them by similarity to a given query. It's
+      like a local search engine for your notes or code.
     bindir: /usr/bin
     section: utils
     homepage: https://github.com/hrs/docsim
     license: GPLv3
     contents:
-      - src: ./manpages/docsim.1
-        dst: /usr/share/man/man1/docsim.1
+      - src: ./manpages/docsim.1.gz
+        dst: /usr/share/man/man1/docsim.1.gz
         file_info:
           mode: 0644
-      - src: ./LICENSE.md
+      - src: ./debian/copyright
         dst: /usr/share/doc/docsim/copyright
         file_info:
           mode: 0644
     formats:
       - deb
       - rpm
+    deb:
+      lintian_overrides:
+        - statically-linked-binary
+        - changelog-file-missing-in-native-package

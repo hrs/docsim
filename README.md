@@ -121,7 +121,7 @@ $ go install github.com/hrs/docsim/docsim@latest
 Note that using `go install` doesn't include the [`man` page][], which you can
 optionally install manually by copying it into e.g. `/usr/local/share/man/man1`.
 
-[`man` page]: ./man/docsim.1
+[`man` page]: ./manpages/docsim.1
 
 ## Running tests
 
