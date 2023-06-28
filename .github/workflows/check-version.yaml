@@ -20,12 +20,5 @@ jobs:
           go-version-file: "go.mod"
         id: go
 
-      - name: Get Newest Tag
-        id: get_version
-        run: |
-          git fetch --depth=1 origin "+refs/tags/*:refs/tags/*"
-          echo "${{ steps.get_version.outputs.tags }}"
-
-      - name: Use Newest Tag
-        run: |
-          echo "The newest version tag is ${{ steps.get_version.outputs.tags }}"
+      - name: Show latest version tag
+        run: "git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | tail -1 | sed s/v//"
