@@ -14,8 +14,6 @@ import (
 	"unicode"
 )
 
-type termMap map[string]float64
-
 type Document struct {
 	path     string
 	termFreq termMap
@@ -83,7 +81,6 @@ func parseTokens(rd io.Reader) ([]string, error) {
 				tokens = append(tokens, word)
 			}
 		}
-
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -103,16 +100,15 @@ func NewDocument(rd io.Reader, config *Config) (*Document, error) {
 	}
 
 	// Loop over the tokens, stem them if configured, pass them through the
-	// stoplist if configured, and, for each that "should" "count", increment it
-	// in the term map.
+	// stoplist if configured, and, for each that "should" "count", increment its
+	// ID in the term map.
 	for _, token := range tokens {
 		if config.NoStoplist || !config.Stoplist.include(token) {
-			if config.NoStemming {
-				termCount[token]++
-			} else {
-				termCount[stem(token)]++
+			if !config.NoStemming {
+				token = stem(token)
 			}
 
+			termCount[termID(token)]++
 			totalTermCount++
 		}
 	}

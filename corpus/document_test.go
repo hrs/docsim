@@ -42,11 +42,11 @@ func TestNewDocument(t *testing.T) {
 
 	tests := []struct {
 		config Config
-		expMap termMap
+		expMap map[string]float64
 	}{
 		{
 			Config{Stoplist: DefaultStoplist},
-			termMap{
+			map[string]float64{
 				"bodi":   0.1250,
 				"magic":  0.2500,
 				"metal":  0.1250,
@@ -68,7 +68,7 @@ func TestNewDocument(t *testing.T) {
 					},
 				),
 			},
-			termMap{
+			map[string]float64{
 				"bodi":   0.0769,
 				"had":    0.0769,
 				"it":     0.0769,
@@ -87,7 +87,7 @@ func TestNewDocument(t *testing.T) {
 			Config{
 				NoStoplist: true,
 			},
-			termMap{
+			map[string]float64{
 				"and":    0.1000,
 				"bodi":   0.0500,
 				"had":    0.0500,
@@ -112,7 +112,7 @@ func TestNewDocument(t *testing.T) {
 				NoStemming: true,
 				Stoplist:   DefaultStoplist,
 			},
-			termMap{
+			map[string]float64{
 				"body":      0.1250,
 				"magic":     0.2500,
 				"metal":     0.1250,
@@ -130,15 +130,8 @@ func TestNewDocument(t *testing.T) {
 			t.Errorf("got unexpected error %v", err)
 		}
 
-		for gotTerm := range got.termFreq {
-			_, expKey := tc.expMap[gotTerm]
-			if !expKey {
-				t.Errorf("parsed unexpected term '%s'", gotTerm)
-			}
-		}
-
 		for expTerm, expFreq := range tc.expMap {
-			gotFreq, ok := got.termFreq[expTerm]
+			gotFreq, ok := got.termFreq[termID(expTerm)]
 			if !ok {
 				t.Errorf("found unexpected term '%s' in termFreq", expTerm)
 			}
@@ -147,15 +140,15 @@ func TestNewDocument(t *testing.T) {
 				t.Errorf("for term '%s' got %.4f, wanted %.4f", expTerm, gotFreq, expFreq)
 			}
 		}
+
+		if len(got.termFreq) > len(tc.expMap) {
+			t.Errorf("parsed more terms than expected")
+		}
 	}
 }
 
 func TestNormalizeTfIdf(t *testing.T) {
-	tm := termMap{
-		"foo": 2.0,
-		"bar": 3.0,
-		"baz": 4.0,
-	}
+	tm := termMap{0: 2.0, 1: 3.0, 2: 4.0}
 
 	tests := []struct {
 		doc    Document
@@ -174,20 +167,12 @@ func TestNormalizeTfIdf(t *testing.T) {
 		},
 		{
 			Document{
-				termFreq: termMap{
-					"foo": 3.0,
-					"bar": 4.0,
-					"baz": 5.0,
-				},
+				termFreq: termMap{0: 3.0, 1: 4.0, 2: 5.0},
 			},
 			tm,
 			Document{
-				tfIdf: termMap{
-					"foo": 6.0,
-					"bar": 12.0,
-					"baz": 20.0,
-				},
-				norm: 24.0832,
+				tfIdf: termMap{0: 6.0, 1: 12.0, 2: 20.0},
+				norm:  24.0832,
 			},
 		},
 	}
@@ -221,11 +206,7 @@ func TestCalcNorm(t *testing.T) {
 		},
 		{
 			Document{
-				tfIdf: termMap{
-					"foo": 2.0,
-					"bar": 3.0,
-					"baz": 4.0,
-				},
+				tfIdf: termMap{0: 2.0, 1: 3.0, 2: 4.0},
 			},
 			5.3852,
 		},

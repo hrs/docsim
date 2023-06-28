@@ -18,13 +18,13 @@ func TestCosineSimilarity(t *testing.T) {
 		sim    float64
 	}
 
-	docA := Document{tfIdf: termMap{"foo": 0.3013, "bar": 0.2628}}
+	docA := Document{tfIdf: termMap{0: 0.3013, 1: 0.2628}}
 	docA.norm = docA.calcNorm()
 
-	docB := Document{tfIdf: termMap{"baz": 0.1577, "quux": 0.7796, "xyzzy": 0.1577}}
+	docB := Document{tfIdf: termMap{2: 0.1577, 3: 0.7796, 4: 0.1577}}
 	docB.norm = docB.calcNorm()
 
-	docC := Document{tfIdf: termMap{"foo": 0.2260, "quux": 0.6496}}
+	docC := Document{tfIdf: termMap{0: 0.2260, 3: 0.6496}}
 	docC.norm = docC.calcNorm()
 
 	cosTests := []cosTest{
