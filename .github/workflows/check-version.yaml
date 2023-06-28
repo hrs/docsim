@@ -1,0 +1,31 @@
+name: Check version
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+        id: go
+
+      - name: Get Newest Tag
+        id: get_version
+        run: |
+          git fetch --depth=1 origin "+refs/tags/*:refs/tags/*"
+          echo "${{ steps.get_version.outputs.tags }}"
+
+      - name: Use Newest Tag
+        run: |
+          echo "The newest version tag is ${{ steps.get_version.outputs.tags }}"
