@@ -21,10 +21,13 @@ jobs:
         id: go
 
       - name: Show git tag
-        run: echo $("git tag")
+        run: echo $("/usr/bin/git tag")
+
       - name: Show git tag grep
-        run: echo $("git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+'")
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+'")
+
       - name: Show git tag grep tail
-        run: echo $("git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1")
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1")
+
       - name: Show git tag grep tail sed
-        run: echo $("git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1 | sed s/v//")
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1 | sed s/v//")
