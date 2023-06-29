@@ -21,7 +21,7 @@ jobs:
         id: go
 
       - name: Show git tag
-        run: echo $("/usr/bin/git tag")
+        run: /usr/bin/git tag
 
       - name: Show git tag grep
         run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+'")
