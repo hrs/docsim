@@ -2,7 +2,9 @@ package corpus
 
 import (
 	"io/fs"
+	"math"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -79,5 +81,45 @@ func TestIsParsableFileSymlink(t *testing.T) {
 	// if FollowSymlinks, the symlink SHOULD be parsable
 	if !isParsableFile(fs.FileInfoToDirEntry(fileInfo), &Config{Stoplist: DefaultStoplist, FollowSymlinks: true}) {
 		t.Errorf("with FollowSymlinks true, expected symlink %s to be parsable", symlinkName)
+	}
+}
+
+func makeDoc(s string, t *testing.T) *Document {
+	config := Config{
+		NoStemming: true,
+		NoStoplist: true,
+	}
+
+	doc, err := NewDocument(strings.NewReader(s), &config)
+	if err != nil {
+		t.Errorf("got unexpected error creating document: %v", err)
+	}
+
+	return doc
+}
+
+func TestNewCorpus(t *testing.T) {
+	docs := []*Document{
+		makeDoc("a b c", t),
+		makeDoc("a b", t),
+		makeDoc("a", t),
+	}
+
+	corpus := NewCorpus(docs)
+
+	tests := []struct {
+		term string
+		freq float64
+	}{
+		{"a", math.Log(3.0 / 3.0)},
+		{"b", math.Log(3.0 / 2.0)},
+		{"c", math.Log(3.0 / 1.0)},
+	}
+
+	for _, tc := range tests {
+		got := corpus.invDocFreq[termID(tc.term)]
+		if !approxEq(got, tc.freq) {
+			t.Errorf("expected IDF(%s) to be %0.4f, got %0.4f", tc.term, tc.freq, got)
+		}
 	}
 }
