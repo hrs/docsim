@@ -115,7 +115,7 @@ $ sudo make install
 Or just:
 
 ``` console
-$ go install github.com/hrs/docsim/docsim@latest
+$ go install github.com/hrs/docsim@latest
 ```
 
 Note that using `go install` doesn't include the [`man` page][], which you can
