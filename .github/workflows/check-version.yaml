@@ -1,0 +1,33 @@
+name: Check version
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+        id: go
+
+      - name: Show git tag
+        run: /usr/bin/git tag
+
+      - name: Show git tag grep
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+'")
+
+      - name: Show git tag grep tail
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1")
+
+      - name: Show git tag grep tail sed
+        run: echo $("/usr/bin/git tag | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+' | tail -1 | sed s/v//")
