@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
 Files: *
-Copyright: © 2023 Harry R. Schwartz <hello@harryschwartz.com> and contributors
+Copyright: © 2024 Robin Schwartz <hello@robinschwartz.me> and contributors
 License: GPL-3+
  The full text of the GPL is distributed as ./LICENSE.md in docsim's source,
  and is distributed in /usr/share/common-licenses/GPL-3 on Debian systems.

@@ -50,7 +50,7 @@ brews:
       man1.install "manpages/docsim.1"
 
 nfpms:
-  - maintainer: Harry R. Schwartz <hello@harryrschwartz.com>
+  - maintainer: Robin Schwartz <hello@robinschwartz.me>
     description: |-
       Local, in-memory search tool, ranking results by textual similarity.
       Docsim uses information retrieval techniques (like stemming and TF-IDF) to
